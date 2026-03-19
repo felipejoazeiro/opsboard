@@ -1,6 +1,7 @@
 import { Router } from 'express'
 import { testDbConnection } from '../db/client.js'
 import { employeesRouter } from './employees.routes.js'
+import { loginRouter } from './login.routes.js'
 
 const router = Router()
 
@@ -18,5 +19,6 @@ router.get('/health', async (_req, res) => {
 })
 
 router.use('/employees', employeesRouter)
+router.use('/login', loginRouter)
 
 export { router }

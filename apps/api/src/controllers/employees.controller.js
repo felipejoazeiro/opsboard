@@ -1,5 +1,11 @@
 import { EmployeeSchema } from '../../../../packages/schemas/EmployeeSchema.js'
+import { z } from 'zod'
+import bcrypt from 'bcryptjs'
 import { getDbPool } from '../db/client.js'
+
+const CreateEmployeeSchema = EmployeeSchema.omit({ id: true, createdAt: true }).extend({
+  password: z.string().min(8, 'A senha deve ter no minimo 8 caracteres.')
+})
 
 export async function listEmployees(_req, res, next) {
   try {
@@ -15,7 +21,7 @@ export async function listEmployees(_req, res, next) {
 
 export async function createEmployee(req, res, next) {
   try {
-    const parsed = EmployeeSchema.omit({ id: true, createdAt: true }).safeParse(req.body)
+    const parsed = CreateEmployeeSchema.safeParse(req.body)
 
     if (!parsed.success) {
       return res.status(400).json({
@@ -24,13 +30,14 @@ export async function createEmployee(req, res, next) {
       })
     }
 
-    const { name, email, role, isActive, teamId } = parsed.data
+    const { name, email, role, isActive, teamId, password } = parsed.data
+    const passwordHash = await bcrypt.hash(password, 12)
 
     const { rows } = await getDbPool().query(
-      `INSERT INTO employees (name, email, role, is_active, team_id)
-       VALUES ($1, $2, $3, $4, $5)
+      `INSERT INTO employees (name, email, role, is_active, team_id, password_hash)
+       VALUES ($1, $2, $3, $4, $5, $6)
        RETURNING id, name, email, role, is_active AS "isActive", created_at AS "createdAt", team_id AS "teamId"`,
-      [name, email, role, isActive, teamId]
+      [name, email, role, isActive, teamId, passwordHash]
     )
 
     return res.status(201).json(rows[0])
