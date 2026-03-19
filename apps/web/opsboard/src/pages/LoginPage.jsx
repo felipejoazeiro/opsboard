@@ -1,0 +1,58 @@
+
+export function LoginPage() {
+
+    const title = 'Bem-vindo de volta!'
+    const description = 'Faça login para acessar o painel de controle e gerenciar suas operações de forma eficiente.'
+
+
+    return (
+        <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-slate-950 px-4 py-10">
+            <div className="pointer-events-none absolute -left-24 -top-24 h-72 w-72 rounded-full bg-cyan-500/15 blur-3xl" />
+            <div className="pointer-events-none absolute -bottom-24 -right-24 h-72 w-72 rounded-full bg-indigo-500/20 blur-3xl" />
+
+            <section className="relative w-full max-w-sm rounded-2xl border border-slate-800 bg-slate-900/80 p-8 shadow-2xl shadow-black/40 backdrop-blur">
+                <h1 className="text-2xl font-semibold text-slate-100">{title}</h1>
+                <p className="mt-2 text-sm text-slate-400">
+                    {description}
+                </p>
+
+                <form className="mt-6 space-y-4">
+                    <div>
+                        <label htmlFor="email" className="mb-1 block text-sm text-slate-300">
+                            Login
+                        </label>
+                        <input
+                            id="email"
+                            type="email"
+                            className="w-full rounded-lg border border-slate-700 bg-slate-950/80 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 outline-none transition focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20"
+                            placeholder="Your login"
+                        />
+                    </div>
+
+                    <div>
+                        <label htmlFor="password" className="mb-1 block text-sm text-slate-300">
+                            Senha
+                        </label>
+                        <input
+                            id="password"
+                            type="password"
+                            className="w-full rounded-lg border border-slate-700 bg-slate-950/80 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 outline-none transition focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20"
+                            placeholder="********"
+                        />
+                    </div>
+
+                    <button
+                        type="submit"
+                        className="w-full rounded-lg bg-cyan-500 px-4 py-2 text-sm font-semibold text-slate-950 transition hover:bg-cyan-400"
+                    >
+                        Entrar
+                    </button>
+
+                    <p className="pt-1 text-center text-xs text-slate-500">
+                        Ambiente seguro. Seu acesso e dados estao protegidos.
+                    </p>
+                </form>
+            </section>
+        </main>
+    )
+}
