@@ -1,47 +1,17 @@
-import { useState } from 'react'
+import { useLogin } from '../hooks/useLogin.js'
 
 export function LoginPage() {
   const title = 'Bem-vindo de volta!'
   const description = 'Faca login para acessar o painel de controle e gerenciar suas operacoes de forma eficiente.'
 
-  const [login, setLogin] = useState('')
-  const [password, setPassword] = useState('')
-  const [isLoading, setIsLoading] = useState(false)
-  const [errorMessage, setErrorMessage] = useState('')
-  const [successMessage, setSuccessMessage] = useState('')
-
-  async function handleSubmit(event) {
-    event.preventDefault()
-    setErrorMessage('')
-    setSuccessMessage('')
-    setIsLoading(true)
-
-    try {
-      const response = await fetch('http://localhost:3333/api/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ login, password })
-      })
-
-      const result = await response.json()
-
-      if (!response.ok) {
-        throw new Error(result.message || 'Falha ao realizar login.')
-      }
-
-      localStorage.setItem('access_token', result.token)
-      localStorage.setItem('user', JSON.stringify(result.user))
-
-      setSuccessMessage(`Login realizado com sucesso. Bem-vindo, ${result.user.name}!`)
-      console.log('Usuario autenticado:', result.user)
-    } catch (error) {
-      setErrorMessage(error.message)
-    } finally {
-      setIsLoading(false)
-    }
-  }
+  const {
+    login, setLogin,
+    password, setPassword,
+    isLoading,
+    errorMessage,
+    successMessage,
+    handleSubmit
+  } = useLogin()
 
   return (
     <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-slate-950 px-4 py-10">
