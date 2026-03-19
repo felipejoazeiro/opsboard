@@ -1,5 +1,6 @@
 import { Router } from 'express'
 import { testDbConnection } from '../db/client.js'
+import { authenticate } from '../middlewares/auth.middleware.js'
 import { employeesRouter } from './employees.routes.js'
 import { loginRouter } from './login.routes.js'
 
@@ -18,7 +19,7 @@ router.get('/health', async (_req, res) => {
   }
 })
 
-router.use('/employees', employeesRouter)
 router.use('/login', loginRouter)
+router.use('/employees', authenticate, employeesRouter)
 
 export { router }

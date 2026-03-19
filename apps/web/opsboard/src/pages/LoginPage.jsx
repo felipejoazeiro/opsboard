@@ -31,8 +31,11 @@ export function LoginPage() {
         throw new Error(result.message || 'Falha ao realizar login.')
       }
 
-      setSuccessMessage(`Login realizado com sucesso. Bem-vindo, ${result.name}!`)
-      console.log('Usuario autenticado:', result)
+      localStorage.setItem('access_token', result.token)
+      localStorage.setItem('user', JSON.stringify(result.user))
+
+      setSuccessMessage(`Login realizado com sucesso. Bem-vindo, ${result.user.name}!`)
+      console.log('Usuario autenticado:', result.user)
     } catch (error) {
       setErrorMessage(error.message)
     } finally {
