@@ -5,6 +5,10 @@ import { getDbPool } from '../db/client.js'
 import { env } from '../config/env.js'
 
 const CreateEmployeeSchema = EmployeeSchema.omit({ id: true, createdAt: true })
+const EmployeeListQuerySchema = z.object({
+  page: z.coerce.number().int().positive().default(1),
+  pageSize: z.coerce.number().int().positive().max(100).default(10)
+})
 
 function normalizeLoginBase(name) {
   const normalized = name
@@ -38,16 +42,57 @@ async function  createUniqueLogin(client, baseLogin, passwordHash) {
   throw new Error('Nao foi possivel gerar um login unico para o funcionario.')
 }
 
-export async function listEmployees(_req, res, next) {
+export async function listEmployees(req, res, next) {
   try {
-    const { rows } = await getDbPool().query(
-      'SELECT id, name, email, role, is_active AS "isActive", created_at AS "createdAt", team_id AS "teamId" FROM employees ORDER BY created_at DESC'
-    )
+    const parsedQuery = EmployeeListQuerySchema.safeParse(req.query)
 
-    return res.json(rows)
+    if (!parsedQuery.success) {
+      return res.status(400).json({
+        message: 'Parametros invalidos para paginacao.',
+        errors: parsedQuery.error.flatten()
+      })
+    }
+
+    const { page, pageSize } = parsedQuery.data
+    const offset = (page - 1) * pageSize
+    const pool = getDbPool()
+
+    const [{ rows: countRows }, { rows }] = await Promise.all([
+      pool.query(
+        'SELECT COUNT(*)::int AS total FROM employees WHERE is_active = true',
+      ),
+      pool.query(
+        `SELECT id, name, email, role, is_active AS "isActive", created_at AS "createdAt", team_id AS "teamId"
+         FROM employees
+         WHERE is_active = true
+         ORDER BY created_at DESC
+         LIMIT $1 OFFSET $2`,
+        [pageSize, offset]
+      )
+    ])
+
+    const total = countRows[0]?.total ?? 0
+    const totalPages = total === 0 ? 0 : Math.ceil(total / pageSize)
+
+    return res.json({
+      data: rows,
+      pagination: {
+        page,
+        pageSize,
+        total,
+        totalPages,
+        hasNextPage: page < totalPages,
+        hasPreviousPage: page > 1
+      }
+    })
   } catch (error) {
     return next(error)
   }
+}
+
+
+export async function getEmployeeInactive(req, res, next) {
+  return listEmployeesByStatus(req, res, next, false)
 }
 
 export async function createEmployee(req, res, next) {
@@ -146,7 +191,7 @@ export async function updateEmployee(req, res, next) {
       values
     )
 
-    if (rows.length === 0) {
+    if(rows.length === 0) {
       return res.status(404).json({
         message: 'Funcionario nao encontrado.'
       })
@@ -155,6 +200,38 @@ export async function updateEmployee(req, res, next) {
     return res.json(rows[0])
   
   }catch (error) {
+    return next(error)
+  }
+}
+
+export async function inactiveEmployee(req, res, next) {
+  try {
+    const { id } = req.params
+    const parsedId = z.number().int().positive().safeParse(Number(id))
+    
+    if (!parsedId.success) {
+      return res.status(400).json({
+        message: 'ID do funcionario invalido.',
+        errors: parsedId.error.flatten()
+      })
+    }
+
+    const { rows } = await getDbPool().query(
+      `UPDATE employees
+       SET is_active = false
+       WHERE id = $1
+       RETURNING id, name, email, role, is_active AS "isActive", created_at AS "createdAt", team_id AS "teamId"`,
+      [parsedId.data]
+    )
+
+    if (rows.length === 0) {
+      return res.status(404).json({
+        message: 'Funcionario nao encontrado.'
+      })
+    }
+
+    return res.json(rows[0], mes)
+  } catch (error) {
     return next(error)
   }
 }
