@@ -1,13 +1,11 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { LoginPage } from './pages/LoginPage'
 import { HomePage } from './pages/HomePage'
-
-function hasAccessToken() {
-  return Boolean(localStorage.getItem('access_token'))
-}
+import { clearSession, hasValidAccessToken } from './lib/auth.js'
 
 function ProtectedRoute({ children }) {
-  if (!hasAccessToken()) {
+  if (!hasValidAccessToken()) {
+    clearSession()
     return <Navigate to="/" replace />
   }
 
@@ -15,9 +13,11 @@ function ProtectedRoute({ children }) {
 }
 
 function PublicLoginRoute() {
-  if (hasAccessToken()) {
+  if (hasValidAccessToken()) {
     return <Navigate to="/home" replace />
   }
+
+  clearSession()
 
   return <LoginPage />
 }
