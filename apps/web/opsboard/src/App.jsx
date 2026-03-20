@@ -1,6 +1,7 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { LoginPage } from './pages/LoginPage'
 import { HomePage } from './pages/HomePage'
+import { DashboardPage } from './pages/DashboardPage'
 import { clearSession, hasValidAccessToken } from './lib/auth.js'
 
 function ProtectedRoute({ children }) {
@@ -32,6 +33,14 @@ function App() {
           element={(
             <ProtectedRoute>
               <HomePage />
+            </ProtectedRoute>
+          )}
+        />
+        <Route
+          path="/dashboard"
+          element={(
+            <ProtectedRoute>
+              <DashboardPage />
             </ProtectedRoute>
           )}
         />
