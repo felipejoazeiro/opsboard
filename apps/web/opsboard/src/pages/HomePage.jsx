@@ -1,6 +1,6 @@
 import heroLogo from "../assets/hero.png";
-import { Footer } from "../components/Footer";
-import { Sidebar } from "../components/sidebar";
+import { Footer } from "../components/Shared/Footer";
+import { Sidebar } from "../components/Shared/SideBar";
 
 export function HomePage() {
   return (
