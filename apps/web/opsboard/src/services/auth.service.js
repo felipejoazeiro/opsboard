@@ -7,6 +7,7 @@ import { apiFetch } from '../lib/apiFetch.js'
 export async function loginRequest(login, password) {
   const response = await apiFetch('/login', {
     method: 'POST',
+    redirectOn401: false,
     body: JSON.stringify({ login, password })
   })
 

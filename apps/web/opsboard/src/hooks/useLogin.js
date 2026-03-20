@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { loginRequest } from '../services/auth.service.js'
 
 /**
@@ -6,6 +7,7 @@ import { loginRequest } from '../services/auth.service.js'
  * Responsável por gerenciar estados e orquestrar o service.
  */
 export function useLogin() {
+  const navigate = useNavigate()
   const [login, setLogin] = useState('')
   const [password, setPassword] = useState('')
   const [isLoading, setIsLoading] = useState(false)
@@ -25,6 +27,7 @@ export function useLogin() {
       localStorage.setItem('user', JSON.stringify(result.user))
 
       setSuccessMessage(`Bem-vindo, ${result.user.name}!`)
+      navigate('/home', { replace: true })
     } catch (error) {
       setErrorMessage(error.message)
     } finally {

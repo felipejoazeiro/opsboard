@@ -10,6 +10,7 @@ const API_BASE = 'http://localhost:3333/api'
  */
 export async function apiFetch(path, options = {}) {
   const token = localStorage.getItem('access_token')
+  const shouldRedirectOnUnauthorized = options.redirectOn401 ?? true
 
   const headers = {
     'Content-Type': 'application/json',
@@ -19,11 +20,10 @@ export async function apiFetch(path, options = {}) {
 
   const response = await fetch(`${API_BASE}${path}`, { ...options, headers })
 
-  if (response.status === 401) {
+  if (response.status === 401 && shouldRedirectOnUnauthorized) {
     localStorage.removeItem('access_token')
     localStorage.removeItem('user')
     window.location.href = '/'
-    return
   }
 
   return response
