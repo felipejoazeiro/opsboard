@@ -67,7 +67,7 @@ export async function createEmployee(req, res, next) {
       })
     }
 
-    const { name, email, role, isActive, teamId } = parsed.data
+    const { name, email, role, teamId } = parsed.data
     const passwordHash = await bcrypt.hash(env.primaryPassword, 12)
     const baseLogin = normalizeLoginBase(name)
 
@@ -81,7 +81,7 @@ export async function createEmployee(req, res, next) {
         `INSERT INTO employees (name, email, role, is_active, team_id, login_id)
          VALUES ($1, $2, $3, $4, $5, $6)
          RETURNING id, name, email, role, is_active AS "isActive", created_at AS "createdAt", team_id AS "teamId", login_id AS "loginId"`,
-        [name, email, role, isActive, teamId, login.id]
+        [name, email, role, true, teamId, login.id]
       )
 
       await client.query('COMMIT')
@@ -98,6 +98,63 @@ export async function createEmployee(req, res, next) {
       client.release()
     }
   } catch (error) {
+    return next(error)
+  }
+}
+
+export async function updateEmployee(req, res, next) {
+  try {
+    const { id } = req.params
+    const parsedId = z.number().int().positive().safeParse(Number(id))
+
+    if (!parsedId.success) {
+      return res.status(400).json({
+        message: 'ID do funcionario invalido.',
+        errors: parsedId.error.flatten()
+      })
+    }
+
+    const parsedBody = EmployeeSchema.partial().safeParse(req.body)
+
+    if (!parsedBody.success) {
+      return res.status(400).json({
+        message: 'Dados invalidos para atualizar funcionario.',
+        errors: parsedBody.error.flatten()
+      })
+    }
+
+    const fields = []
+    const values = []
+    let idx = 1
+
+    for (const [key, value] of Object.entries(parsedBody.data)) {
+      fields.push(`${key} = $${idx}`)
+      values.push(value)
+      idx += 1
+    }
+
+    if (fields.length === 0) {
+      return res.status(400).json({
+        message: 'Nenhum campo fornecido para atualizar.'
+      })
+    }
+
+    values.push(parsedId.data)
+
+    const { rows } = await getDbPool().query(
+      `UPDATE employees SET ${fields.join(', ')} WHERE id = $${idx} RETURNING id, name, email, role, is_active AS "isActive", created_at AS "createdAt", team_id AS "teamId"`,
+      values
+    )
+
+    if (rows.length === 0) {
+      return res.status(404).json({
+        message: 'Funcionario nao encontrado.'
+      })
+    }
+
+    return res.json(rows[0])
+  
+  }catch (error) {
     return next(error)
   }
 }
