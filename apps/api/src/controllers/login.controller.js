@@ -93,3 +93,62 @@ export async function register(req, res) {
   }
 
 }
+
+export async function alterPassword(req, res) {
+  try {
+    const parsed = z.object({
+      login: z.string().min(1, 'Informe o login.'),
+      oldPassword: z.string().min(1, 'Informe a senha atual.'),
+      newPassword: z.string().min(8, 'A nova senha deve ter pelo menos 8 caracteres.')
+    }).safeParse(req.body)
+
+    if (!parsed.success) {
+      return res.status(400).json({
+        message: 'Dados invalidos para alterar senha.',
+        errors: parsed.error.flatten()
+      })
+    }
+    
+    const { login, oldPassword, newPassword } = parsed.data
+
+    const { rows } = await getDbPool().query(
+      `SELECT id, password_hash AS "passwordHash"
+       FROM logins
+       WHERE login = $1`,
+      [login]
+    )
+
+    if (rows.length === 0) {
+      return res.status(401).json({
+        message: 'Usuario nao encontrado.'
+      })
+    }
+
+    const user = rows[0]
+    const isOldPasswordValid = await bcrypt.compare(oldPassword, user.passwordHash)
+
+    if (!isOldPasswordValid) {
+      return res.status(401).json({
+        message: 'Senha atual invalida.'
+      })
+    }
+
+    const newPasswordHash = await bcrypt.hash(newPassword, 12)
+
+    await getDbPool().query(
+      `UPDATE logins
+       SET password_hash = $1
+       WHERE id = $2`,
+      [newPasswordHash, user.id]
+    )
+
+    return res.status(200).json({
+      message: 'Senha alterada com sucesso.'
+    })
+  } catch (error) {
+    return res.status(500).json({
+      message: 'Erro interno no servidor.',
+      details: error.message
+    })
+  }
+}
