@@ -3,6 +3,7 @@ import { testDbConnection } from '../db/client.js'
 import { authenticate } from '../middlewares/auth.middleware.js'
 import { employeesRouter } from './employees.routes.js'
 import { loginRouter } from './login.routes.js'
+import { tasksRouter } from './tasks.routes.js'
 
 const router = Router()
 
@@ -21,5 +22,6 @@ router.get('/health', async (_req, res) => {
 
 router.use('/login', loginRouter)
 router.use('/employees', authenticate, employeesRouter)
+router.use('/tasks', authenticate, tasksRouter)
 
 export { router }

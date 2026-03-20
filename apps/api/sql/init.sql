@@ -41,4 +41,23 @@ WHERE l.login = 'admin'
     WHERE e.email = 'admin@opsboard.local'
   );
 
+CREATE TABLE IF NOT EXISTS tasks (
+  id TEXT PRIMARY KEY,
+  title TEXT NOT NULL,
+  description TEXT,
+  status TEXT NOT NULL CHECK (status IN ('To Do', 'In Progress', 'Done')),
+  priority TEXT NOT NULL CHECK (priority IN ('Low', 'Medium', 'High')),
+  due_date TIMESTAMPTZ,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  created_by TEXT NOT NULL,
+  updated_at TIMESTAMPTZ
+);
+
+CREATE TABLE IF NOT EXISTS task_assignments (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  task_id TEXT REFERENCES tasks(id) ON DELETE CASCADE,
+  employee_id UUID REFERENCES employees(id) ON DELETE CASCADE,
+  assigned_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
 
