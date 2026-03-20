@@ -18,4 +18,27 @@ CREATE TABLE IF NOT EXISTS employees (
   login_id UUID REFERENCES logins(id) ON DELETE CASCADE
 );
 
+-- Seed inicial para teste local.
+-- Login: admin
+-- Senha: admin123
+INSERT INTO logins (login, password_hash)
+VALUES ('admin', '$2a$12$yBNzrcGXcU6ZBrmLlPU97..EcOTZ2uU9Rl4P/hl8snbpu2afuWJBW')
+ON CONFLICT (login) DO NOTHING;
+
+INSERT INTO employees (name, email, role, is_active, team_id, login_id)
+SELECT
+  'Administrador',
+  'admin@opsboard.local',
+  'Manager',
+  TRUE,
+  'core',
+  l.id
+FROM logins l
+WHERE l.login = 'admin'
+  AND NOT EXISTS (
+    SELECT 1
+    FROM employees e
+    WHERE e.email = 'admin@opsboard.local'
+  );
+
 
