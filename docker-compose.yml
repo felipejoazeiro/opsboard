@@ -1,0 +1,22 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: opsboard-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: opsboard
+      POSTGRES_USER: opsboard
+      POSTGRES_PASSWORD: opsboard123
+    ports:
+      - '5433:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./apps/api/sql/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U opsboard -d opsboard']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:
