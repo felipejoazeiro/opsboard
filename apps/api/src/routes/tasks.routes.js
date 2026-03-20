@@ -1,8 +1,9 @@
 import { Router } from 'express'
-import { listTasks } from '../controllers/tasks.controller.js'
+import { createTask, listTasks } from '../controllers/tasks.controller.js'
 
 const tasksRouter = Router()
 
 tasksRouter.get('/', listTasks)
+tasksRouter.post('/', createTask)
 
 export { tasksRouter }

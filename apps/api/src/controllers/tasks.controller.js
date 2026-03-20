@@ -9,6 +9,14 @@ const TaskListQuerySchema = z.object({
   priority: z.enum(['Low', 'Medium', 'High']).optional(),
 })
 
+const CreateTaskSchema = z.object({
+  title: z.string().trim().min(1, 'Titulo obrigatorio').max(140, 'Titulo muito longo'),
+  description: z.string().trim().max(1000, 'Descricao muito longa').optional().or(z.literal('')),
+  status: z.enum(['To Do', 'In Progress', 'Done']).default('To Do'),
+  priority: z.enum(['Low', 'Medium', 'High']).default('Medium'),
+  dueDate: z.string().datetime().optional().or(z.literal('')),
+})
+
 export async function listTasks(req, res, next) {
   try {
     const parsed = TaskListQuerySchema.safeParse(req.query)
@@ -82,6 +90,42 @@ export async function listTasks(req, res, next) {
         hasPreviousPage: page > 1,
       },
     })
+  } catch (error) {
+    next(error)
+  }
+}
+
+export async function createTask(req, res, next) {
+  try {
+    const parsed = CreateTaskSchema.safeParse(req.body)
+
+    if (!parsed.success) {
+      return res.status(400).json({
+        message: 'Dados invalidos para criar tarefa.',
+        errors: parsed.error.flatten(),
+      })
+    }
+
+    const { title, description, status, priority, dueDate } = parsed.data
+    const pool = getDbPool()
+
+    const createdBy = req.user?.sub || req.user?.name || req.user?.email || 'system'
+
+    const { rows } = await pool.query(
+      `INSERT INTO tasks (id, title, description, status, priority, due_date, created_by)
+       VALUES (gen_random_uuid()::text, $1, $2, $3, $4, $5, $6)
+       RETURNING id, title, description, status, priority, due_date, created_at, created_by, updated_at`,
+      [
+        title,
+        description || null,
+        status,
+        priority,
+        dueDate ? new Date(dueDate).toISOString() : null,
+        String(createdBy),
+      ]
+    )
+
+    return res.status(201).json(rows[0])
   } catch (error) {
     next(error)
   }

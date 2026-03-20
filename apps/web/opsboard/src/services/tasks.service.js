@@ -23,3 +23,22 @@ export async function fetchTasks(params = {}) {
 
   return result
 }
+
+/**
+ * Cria uma nova tarefa.
+ * @param {{ title: string, description?: string, status?: string, priority?: string, dueDate?: string }} payload
+ */
+export async function createTask(payload) {
+  const response = await apiFetch('/tasks', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  })
+
+  const result = await response.json()
+
+  if (!response.ok) {
+    throw new Error(result.message || 'Erro ao criar tarefa.')
+  }
+
+  return result
+}
