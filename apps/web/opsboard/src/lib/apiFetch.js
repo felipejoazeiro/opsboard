@@ -1,6 +1,6 @@
 import { clearSession, hasValidAccessToken } from './auth.js'
 
-const API_BASE = 'http://localhost:3333/api'
+const API_BASE = import.meta.env.VITE_API_URL
 
 /**
  * Wrapper sobre fetch que injeta automaticamente o Authorization: Bearer header

@@ -1,50 +1,31 @@
-import { useCallback, useEffect, useState } from "react";
 import { Sidebar } from "../components/Shared/SideBar";
-import { createTask, fetchTasks } from "../services/tasks.service";
+import { createTask } from "../services/tasks.service";
 import { Header } from "../components/Dashboard/Header";
 import { EmptyState } from "../components/Dashboard/EmptyState";
 import { NewTaskCard } from "../components/Dashboard/NewTaskCard";
 import { ErrorState } from "../components/Dashboard/ErrorState";
 import { SearchInput } from "../components/Dashboard/SearchInput";
+import { TaskCard } from "../components/Dashboard/TaskCard";
+import { useDashboard } from "../hooks/useDashboard";
 
 const STATUS_OPTIONS = ["To Do", "In Progress", "Done"];
 const PRIORITY_OPTIONS = ["Low", "Medium", "High"];
 
 export function DashboardPage() {
-  const [tasks, setTasks] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [search, setSearch] = useState("");
-  const [status, setStatus] = useState("");
-  const [priority, setPriority] = useState("");
-  const [debouncedSearch, setDebouncedSearch] = useState("");
-  const [isNewTaskOpen, setIsNewTaskOpen] = useState(false);
-
-  useEffect(() => {
-    const timer = setTimeout(() => setDebouncedSearch(search), 400);
-    return () => clearTimeout(timer);
-  }, [search]);
-
-  const load = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const result = await fetchTasks({
-        search: debouncedSearch || undefined,
-        status: status || undefined,
-        priority: priority || undefined,
-      });
-      setTasks(result.data);
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  }, [debouncedSearch, status, priority]);
-
-  useEffect(() => {
-    load();
-  }, [load]);
+ 
+  const {
+    tasks,
+    loading,
+    error,
+    search,
+    setSearch,
+    status,
+    setStatus,
+    priority,
+    setPriority,
+    isNewTaskOpen,
+    setIsNewTaskOpen,
+  } = useDashboard();
 
   return (
     <div className="flex min-h-screen bg-slate-950 text-slate-100">
