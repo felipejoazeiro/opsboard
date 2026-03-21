@@ -8,7 +8,7 @@ services:
       POSTGRES_USER: opsboard
       POSTGRES_PASSWORD: opsboard123
     ports:
-      - '5433:5432'
+      - '55433:5432'
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./apps/api/sql/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
