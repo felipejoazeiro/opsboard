@@ -1,5 +1,7 @@
 import { useState } from 'react'
-import { NavLink } from 'react-router-dom'
+import { NavLink, useNavigate } from 'react-router-dom'
+import { clearSession } from '../../lib/auth.js'
+import { logoutRequest } from '../../services/auth.service.js'
 import {
   LayoutDashboard,
   Users,
@@ -35,6 +37,16 @@ const items = [
 
 function Sidebar({ children }) {
   const [open, setOpen] = useState(false)
+  const navigate = useNavigate()
+
+  async function logout() {
+    try {
+      await logoutRequest()
+    } finally {
+      clearSession()
+      navigate('/', { replace: true })
+    }
+  }
 
   return (
     <div className="min-h-screen bg-slate-900 text-slate-100">
@@ -89,7 +101,7 @@ function Sidebar({ children }) {
             })}
           </nav>
 
-          <button className="mt-4 flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-slate-300 transition hover:bg-red-500/10 hover:text-red-400">
+          <button onClick={logout} className="mt-4 flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-slate-300 transition hover:bg-red-500/10 hover:text-red-400">
             <LogOut size={18} />
             Sair
           </button>
@@ -151,7 +163,7 @@ function Sidebar({ children }) {
               })}
             </nav>
 
-            <button className="mt-4 flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-slate-300 transition hover:bg-red-500/10 hover:text-red-400">
+            <button onClick={logout} className="mt-4 flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-slate-300 transition hover:bg-red-500/10 hover:text-red-400">
               <LogOut size={18} />
               Sair
             </button>

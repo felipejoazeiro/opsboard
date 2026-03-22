@@ -13,6 +13,8 @@ export function useLogin() {
   const [isLoading, setIsLoading] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
   const [successMessage, setSuccessMessage] = useState('')
+  const [mustChangePassword, setMustChangePassword] = useState(false)
+  const [pendingCredentials, setPendingCredentials] = useState({ login: '', password: '' })
 
   async function handleSubmit(event) {
     event.preventDefault()
@@ -29,10 +31,22 @@ export function useLogin() {
       setSuccessMessage(`Bem-vindo, ${result.user.name}!`)
       navigate('/home', { replace: true })
     } catch (error) {
+      if (error.status === 403) {
+        setPendingCredentials({ login, password })
+        setMustChangePassword(true)
+        return
+      }
       setErrorMessage(error.message)
     } finally {
       setIsLoading(false)
     }
+  }
+
+  function handlePasswordChanged() {
+    setMustChangePassword(false)
+    setPendingCredentials({ login: '', password: '' })
+    setPassword('')
+    setSuccessMessage('Senha alterada com sucesso! Faça login com a nova senha.')
   }
 
   return {
@@ -41,6 +55,9 @@ export function useLogin() {
     isLoading,
     errorMessage,
     successMessage,
-    handleSubmit
+    handleSubmit,
+    mustChangePassword,
+    pendingCredentials,
+    handlePasswordChanged
   }
 }

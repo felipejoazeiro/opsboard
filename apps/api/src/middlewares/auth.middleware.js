@@ -1,11 +1,13 @@
 import jwt from 'jsonwebtoken'
 import { env } from '../config/env.js'
+import { getDbPool } from '../db/client.js'
 
 /**
  * Middleware que valida o JWT enviado no header Authorization: Bearer <token>
  * e expõe req.user = { sub, name, email, role } para os controllers.
+ * Verifica também se o token foi revogado (blocklist na tabela revoked_tokens).
  */
-export function authenticate(req, res, next) {
+export async function authenticate(req, res, next) {
   const authHeader = req.headers['authorization']
 
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -14,13 +16,29 @@ export function authenticate(req, res, next) {
 
   const token = authHeader.slice(7)
 
+  let payload
   try {
-    const payload = jwt.verify(token, env.jwtSecret)
-    req.user = payload
-    return next()
+    payload = jwt.verify(token, env.jwtSecret)
   } catch {
     return res.status(401).json({ message: 'Token invalido ou expirado.' })
   }
+
+  if (payload.jti) {
+    try {
+      const { rows } = await getDbPool().query(
+        'SELECT 1 FROM revoked_tokens WHERE jti = $1',
+        [payload.jti]
+      )
+      if (rows.length > 0) {
+        return res.status(401).json({ message: 'Token revogado. Faca login novamente.' })
+      }
+    } catch {
+      return res.status(500).json({ message: 'Erro ao verificar token.' })
+    }
+  }
+
+  req.user = payload
+  return next()
 }
 
 /**

@@ -1,4 +1,5 @@
 import bcrypt from 'bcryptjs'
+import { randomUUID } from 'crypto'
 import jwt from 'jsonwebtoken'
 import { z } from 'zod'
 import { env } from '../config/env.js'
@@ -45,10 +46,17 @@ export async function login(req, res) {
       })
     }
 
+    if (password === env.primaryPassword) {
+      return res.status(403).json({
+        message: 'Voce esta usando a senha padrao. Por favor, altere sua senha para continuar.'
+      })
+    }
+
     delete user.passwordHash
 
+    const jti = randomUUID()
     const token = jwt.sign(
-      { sub: user.id, name: user.name, email: user.email, role: user.role },
+      { jti, sub: user.id, name: user.name, email: user.email, role: user.role },
       env.jwtSecret,
       { expiresIn: env.jwtExpiresIn }
     )
@@ -145,6 +153,33 @@ export async function alterPassword(req, res) {
     return res.status(200).json({
       message: 'Senha alterada com sucesso.'
     })
+  } catch (error) {
+    return res.status(500).json({
+      message: 'Erro interno no servidor.',
+      details: error.message
+    })
+  }
+}
+
+export async function logout(req, res) {
+  try {
+    const { jti, exp } = req.user
+
+    if (!jti || !exp) {
+      return res.status(400).json({ message: 'Token nao possui identificador para revogacao.' })
+    }
+
+    const expiresAt = new Date(exp * 1000)
+
+    await getDbPool().query(
+      `INSERT INTO revoked_tokens (jti, expires_at) VALUES ($1, $2) ON CONFLICT (jti) DO NOTHING`,
+      [jti, expiresAt]
+    )
+
+    // Remove tokens já expirados para manter a tabela enxuta
+    await getDbPool().query(`DELETE FROM revoked_tokens WHERE expires_at <= NOW()`)
+
+    return res.status(200).json({ message: 'Logout realizado com sucesso.' })
   } catch (error) {
     return res.status(500).json({
       message: 'Erro interno no servidor.',

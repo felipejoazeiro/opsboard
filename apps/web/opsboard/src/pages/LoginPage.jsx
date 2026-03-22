@@ -1,4 +1,5 @@
 import { useLogin } from '../hooks/useLogin.js'
+import { ChangePasswordCard } from '../components/Login/Card.jsx'
 
 export function LoginPage() {
   const title = 'Bem-vindo de volta!'
@@ -10,13 +11,23 @@ export function LoginPage() {
     isLoading,
     errorMessage,
     successMessage,
-    handleSubmit
+    handleSubmit,
+    mustChangePassword,
+    pendingCredentials,
+    handlePasswordChanged
   } = useLogin()
 
   return (
     <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-slate-950 px-4 py-10">
       <div className="pointer-events-none absolute -left-24 -top-24 h-72 w-72 rounded-full bg-cyan-500/15 blur-3xl" />
       <div className="pointer-events-none absolute -bottom-24 -right-24 h-72 w-72 rounded-full bg-indigo-500/20 blur-3xl" />
+
+      {mustChangePassword ? (
+        <ChangePasswordCard
+          pendingCredentials={pendingCredentials}
+          onSuccess={handlePasswordChanged}
+        />
+      ) : (
 
       <section className="relative w-full max-w-sm rounded-2xl border border-slate-800 bg-slate-900/80 p-8 shadow-2xl shadow-black/40 backdrop-blur">
         <h1 className="text-2xl font-semibold text-slate-100">{title}</h1>
@@ -69,6 +80,7 @@ export function LoginPage() {
           </p>
         </form>
       </section>
+      )}
     </main>
   )
 }
