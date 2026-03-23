@@ -1,26 +1,27 @@
-import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
-import { LoginPage } from './pages/LoginPage'
-import { HomePage } from './pages/HomePage'
-import { DashboardPage } from './pages/DashboardPage'
-import { clearSession, hasValidAccessToken } from './lib/auth.js'
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import { LoginPage } from "./pages/LoginPage";
+import { HomePage } from "./pages/HomePage";
+import { DashboardPage } from "./pages/DashboardPage";
+import { clearSession, hasValidAccessToken } from "./lib/auth.js";
+import { TeamsPage } from "./pages/TeamsPage.jsx";
 
 function ProtectedRoute({ children }) {
   if (!hasValidAccessToken()) {
-    clearSession()
-    return <Navigate to="/" replace />
+    clearSession();
+    return <Navigate to="/" replace />;
   }
 
-  return children
+  return children;
 }
 
 function PublicLoginRoute() {
   if (hasValidAccessToken()) {
-    return <Navigate to="/home" replace />
+    return <Navigate to="/home" replace />;
   }
 
-  clearSession()
+  clearSession();
 
-  return <LoginPage />
+  return <LoginPage />;
 }
 
 function App() {
@@ -30,24 +31,32 @@ function App() {
         <Route path="/" element={<PublicLoginRoute />} />
         <Route
           path="/home"
-          element={(
+          element={
             <ProtectedRoute>
               <HomePage />
             </ProtectedRoute>
-          )}
+          }
         />
         <Route
           path="/dashboard"
-          element={(
+          element={
             <ProtectedRoute>
               <DashboardPage />
             </ProtectedRoute>
-          )}
+          }
+        />
+        <Route
+          path="/teams"
+          element={
+            <ProtectedRoute>
+              <TeamsPage />
+            </ProtectedRoute>
+          }
         />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
-  )
+  );
 }
 
-export default App
+export default App;
