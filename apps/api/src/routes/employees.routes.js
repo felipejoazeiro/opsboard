@@ -1,5 +1,6 @@
 import { Router } from 'express'
 import { createEmployee, listEmployees, updateEmployee, inactiveEmployee } from '../controllers/employees.controller.js'
+import { authorize } from '../middlewares/auth.middleware.js'
 
 const employeesRouter = Router()
 
@@ -52,7 +53,7 @@ employeesRouter.get('/', listEmployees)
  *       400:
  *         description: Dados invalidos
  */
-employeesRouter.post('/', createEmployee)
+employeesRouter.post('/', authorize(['Manager', 'Staff']), createEmployee)
 
 /**
  * @openapi
@@ -81,7 +82,7 @@ employeesRouter.post('/', createEmployee)
  *       404:
  *         description: Funcionario nao encontrado
  */
-employeesRouter.put('/:id', updateEmployee)
+employeesRouter.put('/:id', authorize(['Manager', 'Staff']), updateEmployee)
 
 /**
  * @openapi
@@ -104,6 +105,6 @@ employeesRouter.put('/:id', updateEmployee)
  *       404:
  *         description: Funcionario nao encontrado
  */
-employeesRouter.delete('/:id', inactiveEmployee)
+employeesRouter.delete('/:id', authorize(['Manager', 'Staff']), inactiveEmployee)
 
 export { employeesRouter }
