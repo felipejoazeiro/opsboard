@@ -1,4 +1,13 @@
-export function SearchInput({ value, onChange, status, setStatus, priority, setPriority, STATUS_OPTIONS, PRIORITY_OPTIONS }) {
+export function SearchInput({
+  value,
+  onChange,
+  status,
+  setStatus,
+  priority,
+  setPriority,
+  STATUS_OPTIONS = [],
+  PRIORITY_OPTIONS = [],
+}) {
     return(
         <div className="mb-6 flex flex-wrap items-center gap-3">
           <div className="relative flex-1 min-w-50">
