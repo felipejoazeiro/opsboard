@@ -130,3 +130,62 @@ export async function createTask(req, res, next) {
     next(error)
   }
 }
+
+export async function updateTask(req, res, next) {
+  try {
+    const parsed = CreateTaskSchema.partial().safeParse(req.body)
+
+    if (!parsed.success) {
+      return res.status(400).json({
+        message: 'Dados invalidos para atualizar tarefa.',
+        errors: parsed.error.flatten(),
+      })
+    }
+
+    const { title, description, status, priority, dueDate } = parsed.data
+    const { id } = req.params
+    const pool = getDbPool()
+
+    const { rows } = await pool.query(
+      `UPDATE tasks
+       SET title = COALESCE($1, title),
+           description = COALESCE($2, description),
+           status = COALESCE($3, status),
+           priority = COALESCE($4, priority),
+           due_date = COALESCE($5, due_date),
+           updated_at = NOW()
+       WHERE id = $6
+       RETURNING id, title, description, status, priority, due_date, created_at, created_by, updated_at`,
+      [
+        title,
+        description || null,
+        status,
+        priority,
+        dueDate ? new Date(dueDate).toISOString() : null,
+        id,
+      ]
+    )
+    if (rows.length === 0) {
+      return res.status(404).json({ message: 'Tarefa não encontrada.' })
+    }
+    return res.status(200).json(rows[0])
+  } catch (error) {
+      next(error)
+  }
+}
+
+export async function deleteTask(req, res, next) {
+  try {
+    const { id } = req.params
+    const pool = getDbPool()
+    const { rowCount } = await pool.query('DELETE FROM tasks WHERE id = $1', [id])
+
+    if (rowCount === 0) {
+      return res.status(404).json({ message: 'Tarefa não encontrada.' })
+    }
+    return res.status(204).send()
+  }
+  catch (error) {
+    next(error)
+  }
+}

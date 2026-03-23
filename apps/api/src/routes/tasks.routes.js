@@ -1,5 +1,5 @@
 import { Router } from 'express'
-import { createTask, listTasks } from '../controllers/tasks.controller.js'
+import { createTask, listTasks, updateTask, deleteTask } from '../controllers/tasks.controller.js'
 
 const tasksRouter = Router()
 
@@ -38,5 +38,9 @@ tasksRouter.get('/', listTasks)
  *         description: Dados invalidos
  */
 tasksRouter.post('/', createTask)
+
+tasksRouter.put('/:id', updateTask)
+
+tasksRouter.delete('/:id', deleteTask)
 
 export { tasksRouter }
