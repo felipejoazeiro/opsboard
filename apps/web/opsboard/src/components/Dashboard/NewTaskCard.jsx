@@ -20,14 +20,16 @@ export function NewTaskCard({ onClose, onCreated, createTask , STATUS_OPTIONS, P
 
     setSaving(true)
     try {
-      await createTask({
+      const createdTask = await createTask({
         title: title.trim(),
         description: description.trim() || undefined,
         status,
         priority,
         dueDate: dueDate ? new Date(`${dueDate}T00:00:00`).toISOString() : undefined,
       })
-      onCreated()
+      if (onCreated) {
+        await onCreated(createdTask)
+      }
       onClose()
     } catch (err) {
       setError(err.message || 'Nao foi possivel criar a tarefa.')

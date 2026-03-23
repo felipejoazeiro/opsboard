@@ -41,6 +41,7 @@ export function useDashboard() {
         tasks,
         loading,
         error,
+        load,
         search,
         setSearch,
         status,

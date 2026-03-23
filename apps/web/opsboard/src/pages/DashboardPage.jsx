@@ -17,6 +17,7 @@ export function DashboardPage() {
     tasks,
     loading,
     error,
+    load,
     search,
     setSearch,
     status,
