@@ -42,3 +42,30 @@ export async function createTask(payload) {
 
   return result
 }
+
+export async function updateTask(taskId, payload) {
+  const response = await apiFetch(`/tasks/${taskId}`, {
+    method: 'PUT',
+    body: JSON.stringify(payload),
+  })
+
+  const result = await response.json()
+
+  if (!response.ok) {
+    throw new Error(result.message || 'Erro ao atualizar tarefa.')
+  }
+  return result
+}
+
+export async function deleteTask(taskId) {
+  const response = await apiFetch(`/tasks/${taskId}`, {
+    method: 'DELETE',
+  })
+  const result = await response.json()
+
+  if (!response.ok) {
+    throw new Error(result.message || 'Erro ao deletar tarefa.')
+  }
+  return result
+}
+
