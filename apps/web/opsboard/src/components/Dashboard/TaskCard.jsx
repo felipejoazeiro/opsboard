@@ -7,17 +7,17 @@ export function TaskCard({ task }) {
       })
     : null;
 
-    const STATUS_COLORS = {
-      "To Do": "bg-slate-700 text-slate-200",
-      "In Progress": "bg-amber-500/20 text-amber-300",
-      Done: "bg-emerald-500/20 text-emerald-300",
-    };
-    
-    const PRIORITY_COLORS = {
-      Low: "bg-sky-500/20 text-sky-300",
-      Medium: "bg-amber-500/20 text-amber-300",
-      High: "bg-rose-500/20 text-rose-300",
-    };
+  const STATUS_COLORS = {
+    "To Do": "bg-slate-700 text-slate-200",
+    "In Progress": "bg-amber-500/20 text-amber-300",
+    Done: "bg-emerald-500/20 text-emerald-300",
+  };
+
+  const PRIORITY_COLORS = {
+    Low: "bg-sky-500/20 text-sky-300",
+    Medium: "bg-amber-500/20 text-amber-300",
+    High: "bg-rose-500/20 text-rose-300",
+  };
 
   return (
     <div className="rounded-xl border border-slate-800 bg-slate-900 p-5 transition hover:border-slate-700">
@@ -42,6 +42,17 @@ export function TaskCard({ task }) {
       {dueDateLabel && (
         <p className="text-xs text-slate-500">Prazo: {dueDateLabel}</p>
       )}
+
+      <button
+        className="mt-4 text-sm text-cyan-500 hover:underline"
+        type="button"
+        onClick={(event) => {
+          event.stopPropagation();
+          onEdit(task);
+        }}
+      >
+        Edit Task
+      </button>
     </div>
   );
 }
