@@ -110,6 +110,21 @@ const options = {
             createdBy: { type: 'string', example: 'admin' }
           }
         },
+        TeamInput: {
+          type: 'object',
+          required: ['name'],
+          properties: {
+            name: { type: 'string', example: 'Equipe Operacoes' },
+            description: { type: 'string', example: 'Responsavel por operacoes diarias' }
+          }
+        },
+        TeamMemberInput: {
+          type: 'object',
+          required: ['employeeId'],
+          properties: {
+            employeeId: { type: 'string', format: 'uuid', example: '1fd86ab3-7660-4df3-9e26-f96011cf3565' }
+          }
+        },
         ErrorResponse: {
           type: 'object',
           properties: {
