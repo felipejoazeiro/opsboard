@@ -1,4 +1,4 @@
-export function TaskCard({ task }) {
+export function TaskCard({ task, onEdit }) {
   const dueDateLabel = task.due_date
     ? new Date(task.due_date).toLocaleDateString("pt-BR", {
         day: "2-digit",
@@ -48,7 +48,7 @@ export function TaskCard({ task }) {
         type="button"
         onClick={(event) => {
           event.stopPropagation();
-          onEdit(task);
+          onEdit?.(task);
         }}
       >
         Edit Task

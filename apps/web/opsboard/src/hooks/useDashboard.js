@@ -10,6 +10,7 @@ export function useDashboard() {
     const [priority, setPriority] = useState("");
     const [debouncedSearch, setDebouncedSearch] = useState("");
     const [isNewTaskOpen, setIsNewTaskOpen] = useState(false);
+    const [editingTask, setEditingTask] = useState(null);
 
     useEffect(() => {
         const timer = setTimeout(() => setDebouncedSearch(search), 400);
@@ -50,5 +51,7 @@ export function useDashboard() {
         setPriority,
         isNewTaskOpen,
         setIsNewTaskOpen,
+        editingTask,
+        setEditingTask,
     };
 }

@@ -1,8 +1,10 @@
 import { Sidebar } from "../components/Shared/SideBar";
 import { createTask } from "../services/tasks.service";
+import { updateTask } from "../services/tasks.service";
 import { Header } from "../components/Dashboard/Header";
 import { EmptyState } from "../components/Dashboard/EmptyState";
 import { NewTaskCard } from "../components/Dashboard/NewTaskCard";
+import { UpdateTask } from "../components/Dashboard/UpdateTask";
 import { ErrorState } from "../components/Dashboard/ErrorState";
 import { SearchInput } from "../components/Dashboard/SearchInput";
 import { TaskCard } from "../components/Dashboard/TaskCard";
@@ -26,7 +28,15 @@ export function DashboardPage() {
     setPriority,
     isNewTaskOpen,
     setIsNewTaskOpen,
+    editingTask,
+    setEditingTask,
   } = useDashboard();
+
+  async function handleUpdateTask(taskId, payload) {
+    await updateTask(taskId, payload);
+    await load();
+    setEditingTask(null);
+  }
 
   return (
     <div className="flex min-h-screen bg-slate-950 text-slate-100">
@@ -77,7 +87,11 @@ export function DashboardPage() {
         {!loading && !error && tasks.length > 0 && (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {tasks.map((task) => (
-              <TaskCard key={task.id} task={task} />
+              <TaskCard
+                key={task.id}
+                task={task}
+                onEdit={(taskToEdit) => setEditingTask(taskToEdit)}
+              />
             ))}
           </div>
         )}
@@ -90,6 +104,14 @@ export function DashboardPage() {
           createTask={createTask}
           STATUS_OPTIONS={STATUS_OPTIONS}
           PRIORITY_OPTIONS={PRIORITY_OPTIONS}
+        />
+      )}
+
+      {editingTask && (
+        <UpdateTask
+          task={editingTask}
+          onUpdate={handleUpdateTask}
+          onClose={() => setEditingTask(null)}
         />
       )}
     </div>
