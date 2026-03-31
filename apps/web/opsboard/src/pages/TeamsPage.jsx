@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Header } from "../components/Teams/Header";
 import { SearchInput } from "../components/Teams/SearchInput";
 import { NewTeamCard } from "../components/Teams/NewTeamCard";
+import { UpdateTeamCard } from "../components/Teams/UpdateTeamCard";
 import { AddMember } from "../components/Teams/AddMember";
 import { useTeams } from "../hooks/useTeams";
 import { TeamCard } from "../components/Teams/TeamCard";
@@ -11,6 +12,7 @@ import {
   fetchEmployeesForTeams,
   fetchTeamMembers,
   removeEmployeeToTeam,
+  updateTeam,
 } from "../services/teams.service";
 export function TeamsPage() {
   const [employees, setEmployees] = useState([]);
@@ -29,9 +31,17 @@ export function TeamsPage() {
     setSearch,
     isNewTeamOpen,
     setIsNewTeamOpen,
+    editingTeam,
+    setEditingTeam,
     addingMembersTeam,
     setAddingMembersTeam,
   } = useTeams();
+
+  async function handleUpdateTeam(teamId, payload) {
+    await updateTeam(teamId, payload);
+    await load();
+    setEditingTeam(null);
+  }
 
   useEffect(() => {
     if (!addingMembersTeam) return;
@@ -165,6 +175,7 @@ export function TeamsPage() {
                   key={team.id}
                   team={team}
                   onClick={() => setAddingMembersTeam(team)}
+                  onEdit={(teamToEdit) => setEditingTeam(teamToEdit)}
                 />
             ))}
           </div>
@@ -176,6 +187,14 @@ export function TeamsPage() {
           onClose={() => setIsNewTeamOpen(false)}
           onCreated={load}
           createTeam={createTeam}
+        />
+      )}
+
+      {editingTeam && (
+        <UpdateTeamCard
+          team={editingTeam}
+          onUpdate={handleUpdateTeam}
+          onClose={() => setEditingTeam(null)}
         />
       )}
 
