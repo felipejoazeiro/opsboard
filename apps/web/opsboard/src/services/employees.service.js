@@ -17,6 +17,31 @@ export async function fetchEmployees(params = {}) {
     return response.json();
 }
 
+export async function fetchRoles() {
+    const response = await apiFetch("/employees/roles");
+    const result = await response.json();
+
+    if (!response.ok) {
+        throw new Error(result.message || "Erro ao buscar cargos.");
+    }
+
+    return result;
+}
+
+export async function createRole(payload) {
+    const response = await apiFetch("/employees/roles", {
+        method: "POST",
+        body: JSON.stringify(payload),
+    });
+    const result = await response.json();
+
+    if (!response.ok) {
+        throw new Error(result.message || "Erro ao criar cargo.");
+    }
+
+    return result;
+}
+
 export async function fetchEmployeeById(id) {
     const response = await apiFetch(`/employees/${id}`);
     if (!response.ok) {

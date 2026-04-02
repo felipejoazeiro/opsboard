@@ -1,7 +1,9 @@
 import { Router } from "express";
 import {
   createEmployee,
+  createRole,
   getEmployeeById,
+  listRoles,
   listEmployees,
   updateEmployee,
   inactiveEmployee,
@@ -38,6 +40,8 @@ const employeesRouter = Router();
  *               $ref: '#/components/schemas/EmployeeListResponse'
  */
 employeesRouter.get("/", listEmployees);
+employeesRouter.get("/roles", authorize(["manager", "staff"]), listRoles);
+employeesRouter.post("/roles", authorize(["manager", "staff"]), createRole);
 
 employeesRouter.get("/:id", authorize(["manager", "staff"]), getEmployeeById);
 

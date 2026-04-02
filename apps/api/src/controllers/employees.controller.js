@@ -1,15 +1,27 @@
-import { EmployeeSchema } from "../../../../packages/schemas/EmployeeSchema.js";
 import { z } from "zod";
 import bcrypt from "bcryptjs";
 import { getDbPool } from "../db/client.js";
 import { env } from "../config/env.js";
 
-const CreateEmployeeSchema = EmployeeSchema.omit({ id: true, createdAt: true });
+const CreateEmployeeSchema = z
+  .object({
+    name: z.string().trim().min(1),
+    email: z.string().email(),
+    isActive: z.boolean().optional(),
+    roleId: z.string().uuid().optional(),
+    role: z.string().trim().min(1).optional(),
+    roleLevel: z.enum(["manager", "staff", "intern"]).optional(),
+  })
+  .refine((payload) => payload.roleId || (payload.role && payload.roleLevel), {
+    message: "Informe roleId ou role + roleLevel para criar funcionario.",
+    path: ["roleId"],
+  });
 const UpdateEmployeeSchema = z
   .object({
     name: z.string().trim().min(1).optional(),
     email: z.string().email().optional(),
     isActive: z.boolean().optional(),
+    roleId: z.string().uuid().optional(),
     role: z.string().trim().min(1).optional(),
     roleLevel: z.enum(["manager", "staff", "intern"]).optional(),
   })
@@ -20,25 +32,90 @@ const UpdateEmployeeSchema = z
   .refine((payload) => payload.roleLevel === undefined || payload.role !== undefined, {
     message: "role e obrigatorio quando roleLevel for informado.",
     path: ["role"],
+  })
+  .refine((payload) => payload.roleId === undefined || (payload.role === undefined && payload.roleLevel === undefined), {
+    message: "Nao informe roleId junto com role/roleLevel.",
+    path: ["roleId"],
   });
 const EmployeeListQuerySchema = z.object({
   page: z.coerce.number().int().positive().default(1),
   pageSize: z.coerce.number().int().positive().max(100).default(10),
 });
 const EmployeeIdSchema = z.string().uuid();
+const CreateRoleSchema = z.object({
+  name: z.string().trim().min(1),
+  level: z.enum(["manager", "staff", "intern"]),
+});
 
-async function getOrCreateRole(client, roleName, roleLevel) {
-  const normalizedLevel = roleLevel.toLowerCase();
-
+async function createRoleRecord(client, name, level) {
   const { rows } = await client.query(
     `INSERT INTO roles (name, level)
-     VALUES ($1, $2)
-     ON CONFLICT (name, level) DO UPDATE SET name = EXCLUDED.name
-     RETURNING id, name, level`,
-    [roleName.trim(), normalizedLevel],
+      VALUES ($1, $2)
+      ON CONFLICT (name, level) DO UPDATE SET name = EXCLUDED.name
+      RETURNING id, name, level`,
+    [name.trim(), level.toLowerCase()],
   );
-
   return rows[0];
+}
+
+async function getRoleById(client, roleId) {
+  const { rows } = await client.query(
+    "SELECT id, name, level FROM roles WHERE id = $1",
+    [roleId],
+  );
+  return rows[0] ?? null;
+}
+
+async function resolveRole(client, { roleId, role, roleLevel }) {
+  if (roleId) {
+    const selectedRole = await getRoleById(client, roleId);
+    if (!selectedRole) {
+      throw new Error("Cargo nao encontrado para o roleId informado.");
+    }
+    return selectedRole;
+  }
+
+  return createRoleRecord(client, role, roleLevel);
+}
+
+export async function listRoles(req, res, next) {
+  try {
+    const { rows } = await getDbPool().query(
+      "SELECT id, name, level FROM roles ORDER BY name ASC",
+    );
+    return res.json({ data: rows });
+  } catch (error) {
+    return next(error);
+  }
+}
+
+export async function createRole(req, res, next) {
+  try {
+    const parsed = CreateRoleSchema.safeParse(req.body);
+    if (!parsed.success) {
+      return res.status(400).json({
+        message: "Dados invalidos para criar cargo.",
+        errors: parsed.error.flatten(),
+      });
+    }
+
+    const requesterRole = String(req.user?.role || "").toLowerCase();
+    if (parsed.data.level === "manager" && requesterRole !== "manager") {
+      return res.status(403).json({
+        message: "Apenas manager pode criar cargo com nivel manager.",
+      });
+    }
+
+    const client = await getDbPool().connect();
+    try {
+      const role = await createRoleRecord(client, parsed.data.name, parsed.data.level);
+      return res.status(201).json(role);
+    } finally {
+      client.release();
+    }
+  } catch (error) {
+    return next(error);
+  }
 }
 
 function normalizeLoginBase(name) {
@@ -187,7 +264,7 @@ export async function createEmployee(req, res, next) {
       });
     }
 
-    const { name, email, role, roleLevel, isActive } = parsed.data;
+    const { name, email, roleId, role, roleLevel, isActive } = parsed.data;
     const passwordHash = await bcrypt.hash(env.primaryPassword, 12);
     const baseLogin = normalizeLoginBase(name);
 
@@ -196,7 +273,7 @@ export async function createEmployee(req, res, next) {
       await client.query("BEGIN");
 
       const login = await createUniqueLogin(client, baseLogin, passwordHash);
-      const createdRole = await getOrCreateRole(client, role, roleLevel);
+      const createdRole = await resolveRole(client, { roleId, role, roleLevel });
 
       const { rows } = await client.query(
         `INSERT INTO employees (name, email, role_id, is_active, login_id)
@@ -297,12 +374,16 @@ export async function updateEmployee(req, res, next) {
         idx += 1;
       }
 
-      if (parsedBody.data.role !== undefined && parsedBody.data.roleLevel !== undefined) {
-        const updatedRole = await getOrCreateRole(
-          client,
-          parsedBody.data.role,
-          parsedBody.data.roleLevel,
-        );
+      if (parsedBody.data.roleId !== undefined) {
+        const updatedRole = await resolveRole(client, { roleId: parsedBody.data.roleId });
+        updateFields.push(`role_id = $${idx}`);
+        values.push(updatedRole.id);
+        idx += 1;
+      } else if (parsedBody.data.role !== undefined && parsedBody.data.roleLevel !== undefined) {
+        const updatedRole = await resolveRole(client, {
+          role: parsedBody.data.role,
+          roleLevel: parsedBody.data.roleLevel,
+        });
         updateFields.push(`role_id = $${idx}`);
         values.push(updatedRole.id);
         idx += 1;

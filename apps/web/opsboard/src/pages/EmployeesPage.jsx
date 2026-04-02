@@ -5,12 +5,14 @@ import { Header } from "../components/Employee/Header";
 import { SearchInput } from "../components/Employee/SearchInput";
 import { EmployeeCard } from "../components/Employee/EmployeeCard";
 import { NewEmployeeCard } from "../components/Employee/NewEmployeeCard";
+import { NewRoleCard } from "../components/Employee/NewRoleCard";
 import { UpdateEmployee } from "../components/Employee/UpdateEmployee";
 import { EmployeeDetailsCard } from "../components/Employee/EmployeeDetailsCard";
 import { EmptyState } from "../components/Employee/EmptyState";
 import { ErrorState } from "../components/Employee/ErrorState";
 import {
   createEmployee,
+  createRole,
   fetchEmployeeById,
   updateEmployee,
 } from "../services/employees.service";
@@ -27,6 +29,8 @@ export function EmployeesPage() {
     setIsNewEmployeeOpen,
     isNewRoleOpen,
     setIsNewRoleOpen,
+    roles,
+    loadRoles,
     editingEmployee,
     setEditingEmployee,
   } = useEmployee();
@@ -65,6 +69,12 @@ export function EmployeesPage() {
     await createEmployee(payload);
     await load();
     setIsNewEmployeeOpen(false);
+    setIsNewRoleOpen(false);
+  }
+
+  async function handleCreateRole(payload) {
+    await createRole(payload);
+    await loadRoles();
     setIsNewRoleOpen(false);
   }
 
@@ -114,7 +124,14 @@ export function EmployeesPage() {
         {isNewEmployeeOpen && (
           <NewEmployeeCard
             onCreate={handleCreateEmployee}
+            roles={roles}
             onClose={() => setIsNewEmployeeOpen(false)}
+          />
+        )}
+        {isNewRoleOpen && (
+          <NewRoleCard
+            onCreate={handleCreateRole}
+            onClose={() => setIsNewRoleOpen(false)}
           />
         )}
         {editingEmployee && (

@@ -4,6 +4,7 @@ export const EmployeeSchema = z.object({
     id: z.string().optional(),
     name: z.string().min(1, 'Name is required'),
     email: z.string().email('Invalid email address'),
+    roleId: z.string().uuid('Role id must be a valid UUID').optional(),
     role: z.string().trim().min(1, 'Role name is required'),
     roleLevel: z.enum(['manager', 'staff', 'intern'], 'Role level must be manager, staff, or intern'),
     isActive: z.boolean().default(true),

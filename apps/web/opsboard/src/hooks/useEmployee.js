@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { fetchEmployees } from "../services/employees.service";
+import { fetchEmployees, fetchRoles } from "../services/employees.service";
 
 export function useEmployee() {
     const [employees, setEmployees] = useState([]);
@@ -9,6 +9,7 @@ export function useEmployee() {
     const [debouncedSearch, setDebouncedSearch] = useState("");
     const [isNewEmployeeOpen, setIsNewEmployeeOpen] = useState(false);
     const [isNewRoleOpen, setIsNewRoleOpen] = useState(false);
+    const [roles, setRoles] = useState([]);
     const [editingEmployee, setEditingEmployee] = useState(null);
 
     useEffect(() => {
@@ -34,6 +35,19 @@ export function useEmployee() {
         load();
     }, [load]);
 
+    const loadRoles = useCallback(async () => {
+        try {
+            const result = await fetchRoles();
+            setRoles(Array.isArray(result.data) ? result.data : []);
+        } catch {
+            setRoles([]);
+        }
+    }, []);
+
+    useEffect(() => {
+        loadRoles();
+    }, [loadRoles]);
+
     return {
         employees,
         loading,
@@ -43,6 +57,8 @@ export function useEmployee() {
         setSearch,
         isNewEmployeeOpen,
         setIsNewEmployeeOpen,
+        roles,
+        loadRoles,
         editingEmployee,
         setEditingEmployee,
         isNewRoleOpen,

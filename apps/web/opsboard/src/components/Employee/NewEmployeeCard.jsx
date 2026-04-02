@@ -1,18 +1,23 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
-export function NewEmployeeCard({ onCreate, onClose }) {
+export function NewEmployeeCard({ onCreate, onClose, roles = [] }) {
   const [name, setName] = useState("");
-  const [role, setRole] = useState("");
-  const [roleLevel, setRoleLevel] = useState("staff");
+  const [roleId, setRoleId] = useState(roles[0]?.id ?? "");
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+
+  useEffect(() => {
+    if (!roleId && roles.length > 0) {
+      setRoleId(roles[0].id);
+    }
+  }, [roleId, roles]);
 
   async function handleSubmit(e) {
     e.preventDefault();
     setError(null);
 
-    if (!name.trim() || !role.trim() || !email.trim()) {
+    if (!name.trim() || !roleId || !email.trim()) {
       setError("Nome, Cargo e Email são obrigatórios.");
       return;
     }
@@ -20,8 +25,7 @@ export function NewEmployeeCard({ onCreate, onClose }) {
     try {
       const newEmployee = await onCreate({
         name: name.trim(),
-        role: role.trim(),
-        roleLevel,
+        roleId,
         email: email.trim(),
       });
       if (newEmployee) {
@@ -79,24 +83,19 @@ export function NewEmployeeCard({ onCreate, onClose }) {
           </div>
           <div>
             <label className="mb-1 block text-sm text-slate-300">Cargo</label>
-            <input
-              type="text"
-              value={role}
-              onChange={(e) => setRole(e.target.value)}
-              className="w-full rounded-lg border border-slate-700 bg-slate-900 py-2.5 px-4 text-sm text-slate-100 placeholder-slate-500 outline-none transition focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500"
-              placeholder="Ex: Analista de Suporte"
-            />
-          </div>
-          <div>
-            <label className="mb-1 block text-sm text-slate-300">Nível de acesso</label>
             <select
-              value={roleLevel}
-              onChange={(e) => setRoleLevel(e.target.value)}
+              value={roleId}
+              onChange={(event) => setRoleId(event.target.value)}
               className="w-full rounded-lg border border-slate-700 bg-slate-900 py-2.5 px-4 text-sm text-slate-100 outline-none transition focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500"
             >
-              <option value="manager">Manager</option>
-              <option value="staff">Staff</option>
-              <option value="intern">Intern</option>
+              <option value="" disabled>
+                Selecione um cargo
+              </option>
+              {roles.map((roleOption) => (
+                <option key={roleOption.id} value={roleOption.id}>
+                  {roleOption.name} ({roleOption.level})
+                </option>
+              ))}
             </select>
           </div>
           <div>
