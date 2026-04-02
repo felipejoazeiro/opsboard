@@ -1,8 +1,14 @@
-import { Router } from 'express'
-import { createEmployee, listEmployees, updateEmployee, inactiveEmployee } from '../controllers/employees.controller.js'
-import { authorize } from '../middlewares/auth.middleware.js'
+import { Router } from "express";
+import {
+  createEmployee,
+  getEmployeeById,
+  listEmployees,
+  updateEmployee,
+  inactiveEmployee,
+} from "../controllers/employees.controller.js";
+import { authorize } from "../middlewares/auth.middleware.js";
 
-const employeesRouter = Router()
+const employeesRouter = Router();
 
 /**
  * @openapi
@@ -31,7 +37,9 @@ const employeesRouter = Router()
  *             schema:
  *               $ref: '#/components/schemas/EmployeeListResponse'
  */
-employeesRouter.get('/', listEmployees)
+employeesRouter.get("/", listEmployees);
+
+employeesRouter.get("/:id", authorize(["Manager", "Staff"]), getEmployeeById);
 
 /**
  * @openapi
@@ -53,7 +61,7 @@ employeesRouter.get('/', listEmployees)
  *       400:
  *         description: Dados invalidos
  */
-employeesRouter.post('/', authorize(['Manager', 'Staff']), createEmployee)
+employeesRouter.post("/", authorize(["Manager", "Staff"]), createEmployee);
 
 /**
  * @openapi
@@ -82,7 +90,7 @@ employeesRouter.post('/', authorize(['Manager', 'Staff']), createEmployee)
  *       404:
  *         description: Funcionario nao encontrado
  */
-employeesRouter.put('/:id', authorize(['Manager', 'Staff']), updateEmployee)
+employeesRouter.put("/:id", authorize(["Manager", "Staff"]), updateEmployee);
 
 /**
  * @openapi
@@ -105,6 +113,10 @@ employeesRouter.put('/:id', authorize(['Manager', 'Staff']), updateEmployee)
  *       404:
  *         description: Funcionario nao encontrado
  */
-employeesRouter.delete('/:id', authorize(['Manager', 'Staff']), inactiveEmployee)
+employeesRouter.delete(
+  "/:id",
+  authorize(["Manager", "Staff"]),
+  inactiveEmployee,
+);
 
-export { employeesRouter }
+export { employeesRouter };

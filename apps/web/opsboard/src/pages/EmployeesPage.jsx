@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import { useState } from "react";
 import { useEmployee } from "../hooks/useEmployee";
 import { SideBar } from "../components/Shared/SideBar";
 import { Header } from "../components/Employee/Header";
@@ -6,16 +6,21 @@ import { SearchInput } from "../components/Employee/SearchInput";
 import { EmployeeCard } from "../components/Employee/EmployeeCard";
 import { NewEmployeeCard } from "../components/Employee/NewEmployeeCard";
 import { UpdateEmployee } from "../components/Employee/UpdateEmployee";
-import { EmptyState } from "../components/Shared/EmptyState";
-import { ErrorState } from "../components/Shared/ErrorState";
+import { EmployeeDetailsCard } from "../components/Employee/EmployeeDetailsCard";
+import { EmptyState } from "../components/Employee/EmptyState";
+import { ErrorState } from "../components/Employee/ErrorState";
+import {
+  createEmployee,
+  fetchEmployeeById,
+  updateEmployee,
+} from "../services/employees.service";
 
 export function EmployeesPage() {
   const {
     employees,
     loading,
     error,
-    isAddEmployeeOpen,
-    setIsAddEmployeeOpen,
+    load,
     search,
     setSearch,
     isNewEmployeeOpen,
@@ -23,6 +28,28 @@ export function EmployeesPage() {
     editingEmployee,
     setEditingEmployee,
   } = useEmployee();
+
+  const employeeList = Array.isArray(employees) ? employees : [];
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+  const [selectedEmployee, setSelectedEmployee] = useState(null);
+  const [detailsLoading, setDetailsLoading] = useState(false);
+  const [detailsError, setDetailsError] = useState(null);
+
+  async function handleOpenEmployeeDetails(employeeId) {
+    setIsDetailsOpen(true);
+    setDetailsLoading(true);
+    setDetailsError(null);
+    setSelectedEmployee(null);
+
+    try {
+      const employee = await fetchEmployeeById(employeeId);
+      setSelectedEmployee(employee);
+    } catch (err) {
+      setDetailsError(err.message || "Erro ao buscar detalhes do funcionário.");
+    } finally {
+      setDetailsLoading(false);
+    }
+  }
 
   async function handleUpdateEmployee(employeeId, payload) {
     await updateEmployee(employeeId, payload);
@@ -68,13 +95,14 @@ export function EmployeesPage() {
           </div>
         )}
         {!loading && error && <ErrorState message={error} />}
-        {!loading && !error && employees.length === 0 && <EmptyState />}
+        {!loading && !error && employeeList.length === 0 && <EmptyState />}
         {!loading &&
           !error &&
-          employees.map((employee) => (
+          employeeList.map((employee) => (
             <EmployeeCard
               key={employee.id}
               employee={employee}
+              onClick={() => handleOpenEmployeeDetails(employee.id)}
               onEdit={() => setEditingEmployee(employee)}
             />
           ))}
@@ -89,6 +117,18 @@ export function EmployeesPage() {
             employee={editingEmployee}
             onUpdate={handleUpdateEmployee}
             onClose={() => setEditingEmployee(null)}
+          />
+        )}
+        {isDetailsOpen && (
+          <EmployeeDetailsCard
+            employee={selectedEmployee}
+            loading={detailsLoading}
+            error={detailsError}
+            onClose={() => {
+              setIsDetailsOpen(false);
+              setSelectedEmployee(null);
+              setDetailsError(null);
+            }}
           />
         )}
       </main>

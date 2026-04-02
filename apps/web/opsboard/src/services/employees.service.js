@@ -13,7 +13,8 @@ export async function fetchEmployees(params = {}) {
         const result = await response.json();
         throw new Error(result.message || "Erro ao buscar funcionários.");
     }
-    return response;
+
+    return response.json();
 }
 
 export async function fetchEmployeeById(id) {
@@ -22,7 +23,7 @@ export async function fetchEmployeeById(id) {
         const result = await response.json();
         throw new Error(result.message || "Erro ao buscar funcionário.");
     }
-    return response;
+    return response.json();
 }
 
 export async function createEmployee(payload) {

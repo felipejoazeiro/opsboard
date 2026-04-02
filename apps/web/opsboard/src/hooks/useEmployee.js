@@ -5,7 +5,6 @@ export function useEmployee() {
     const [employees, setEmployees] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [isAddEmployeeOpen, setIsAddEmployeeOpen] = useState(false);
     const [search, setSearch] = useState("");
     const [debouncedSearch, setDebouncedSearch] = useState("");
     const [isNewEmployeeOpen, setIsNewEmployeeOpen] = useState(false);
@@ -21,8 +20,9 @@ export function useEmployee() {
         setError(null);
         try {
             const result = await fetchEmployees({ search: debouncedSearch || undefined });
-            setEmployees(result.data);
+            setEmployees(Array.isArray(result.data) ? result.data : []);
         } catch (err) {
+            setEmployees([]);
             setError(err.message);
         } finally {
             setLoading(false);
@@ -37,8 +37,7 @@ export function useEmployee() {
         employees,
         loading,
         error,
-        isAddEmployeeOpen,
-        setIsAddEmployeeOpen,
+        load,
         search,
         setSearch,
         isNewEmployeeOpen,

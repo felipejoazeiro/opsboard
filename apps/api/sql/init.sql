@@ -14,7 +14,6 @@ CREATE TABLE IF NOT EXISTS employees (
   role TEXT NOT NULL CHECK (role IN ('Manager', 'Staff', 'Intern')),
   is_active BOOLEAN NOT NULL DEFAULT TRUE,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  team_id TEXT NOT NULL,
   login_id UUID REFERENCES logins(id) ON DELETE CASCADE
 );
 
@@ -25,13 +24,12 @@ INSERT INTO logins (login, password_hash)
 VALUES ('admin', '$2a$12$yBNzrcGXcU6ZBrmLlPU97..EcOTZ2uU9Rl4P/hl8snbpu2afuWJBW')
 ON CONFLICT (login) DO NOTHING;
 
-INSERT INTO employees (name, email, role, is_active, team_id, login_id)
+INSERT INTO employees (name, email, role, is_active, login_id)
 SELECT
   'Administrador',
   'admin@opsboard.local',
   'Manager',
   TRUE,
-  'core',
   l.id
 FROM logins l
 WHERE l.login = 'admin'
