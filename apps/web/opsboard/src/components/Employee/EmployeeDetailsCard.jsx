@@ -41,6 +41,7 @@ export function EmployeeDetailsCard({ employee, loading, error, onClose }) {
             <DetailRow label="Nome" value={employee.name} />
             <DetailRow label="Email" value={employee.email} />
             <DetailRow label="Cargo" value={employee.role} />
+            <DetailRow label="Nível de acesso" value={employee.roleLevel} />
             <DetailRow label="Status" value={employee.isActive ? "Ativo" : "Inativo"} />
             <DetailRow label="Time" value={employee.teamName || "Sem time"} />
             <DetailRow

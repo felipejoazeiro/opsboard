@@ -46,14 +46,19 @@ export async function authenticate(req, res, next) {
  * Uso: authorize('Manager', 'Staff')
  */
 export function authorize(...allowedRoles) {
-  const normalizedRoles = allowedRoles.flat().filter(Boolean)
+  const normalizedRoles = allowedRoles
+    .flat()
+    .filter(Boolean)
+    .map((role) => String(role).toLowerCase())
 
   return (req, res, next) => {
     if (!req.user) {
       return res.status(401).json({ message: 'Nao autenticado.' })
     }
 
-    if (!normalizedRoles.includes(req.user.role)) {
+    const userRole = String(req.user.role || '').toLowerCase()
+
+    if (!normalizedRoles.includes(userRole)) {
       return res.status(403).json({
         message: `Acesso negado. Requer perfil: ${normalizedRoles.join(',')}.`
       })

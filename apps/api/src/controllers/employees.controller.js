@@ -140,7 +140,7 @@ export async function listEmployees(req, res, next) {
          FROM employees e
          INNER JOIN roles r ON e.role_id = r.id
          WHERE e.is_active = true
-         ORDER BY created_at DESC
+         ORDER BY e.created_at DESC
          LIMIT $1 OFFSET $2`,
         [pageSize, offset],
       ),
