@@ -2,7 +2,9 @@ import { useState } from "react";
 
 export function NewEmployeeCard({ onCreate, onClose }) {
   const [name, setName] = useState("");
-  const [position, setPosition] = useState("");
+  const [role, setRole] = useState("");
+  const [roleLevel, setRoleLevel] = useState("staff");
+  const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -10,23 +12,25 @@ export function NewEmployeeCard({ onCreate, onClose }) {
     e.preventDefault();
     setError(null);
 
-    if (!name.trim() || !position.trim()) {
-      setError("Name and position are required.");
+    if (!name.trim() || !role.trim() || !email.trim()) {
+      setError("Nome, Cargo e Email são obrigatórios.");
       return;
     }
     setLoading(true);
     try {
       const newEmployee = await onCreate({
         name: name.trim(),
-        position: position.trim(),
+        role: role.trim(),
+        roleLevel,
+        email: email.trim(),
       });
       if (newEmployee) {
         onClose();
       } else {
-        setError("Failed to create employee.");
+        setError("Falha ao criar funcionário.");
       }
     } catch (error) {
-      setError(error.message || "Failed to create employee.");
+      setError(error.message || "Falha ao criar funcionário.");
     } finally {
       setLoading(false);
     }
@@ -77,10 +81,32 @@ export function NewEmployeeCard({ onCreate, onClose }) {
             <label className="mb-1 block text-sm text-slate-300">Cargo</label>
             <input
               type="text"
-              value={position}
-              onChange={(e) => setPosition(e.target.value)}
+              value={role}
+              onChange={(e) => setRole(e.target.value)}
               className="w-full rounded-lg border border-slate-700 bg-slate-900 py-2.5 px-4 text-sm text-slate-100 placeholder-slate-500 outline-none transition focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500"
               placeholder="Ex: Analista de Suporte"
+            />
+          </div>
+          <div>
+            <label className="mb-1 block text-sm text-slate-300">Nível de acesso</label>
+            <select
+              value={roleLevel}
+              onChange={(e) => setRoleLevel(e.target.value)}
+              className="w-full rounded-lg border border-slate-700 bg-slate-900 py-2.5 px-4 text-sm text-slate-100 outline-none transition focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500"
+            >
+              <option value="manager">Manager</option>
+              <option value="staff">Staff</option>
+              <option value="intern">Intern</option>
+            </select>
+          </div>
+          <div>
+            <label className="mb-1 block text-sm text-slate-300">Email</label>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full rounded-lg border border-slate-700 bg-slate-900 py-2.5 px-4 text-sm text-slate-100 placeholder-slate-500 outline-none transition focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500"
+              placeholder="Ex: joao.silva@example.com"
             />
           </div>
           {error && <p className="text-sm text-red-500">{error}</p>}

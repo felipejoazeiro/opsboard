@@ -41,7 +41,8 @@ const options = {
                 id: { type: 'string', format: 'uuid' },
                 name: { type: 'string' },
                 email: { type: 'string', format: 'email' },
-                role: { type: 'string', enum: ['Manager', 'Staff', 'Intern'] }
+                role: { type: 'string', example: 'Analista de Suporte' },
+                roleLevel: { type: 'string', enum: ['manager', 'staff', 'intern'], example: 'staff' }
               }
             }
           }
@@ -57,11 +58,12 @@ const options = {
         },
         EmployeeInput: {
           type: 'object',
-          required: ['name', 'email', 'role', 'teamId'],
+          required: ['name', 'email', 'role', 'roleLevel'],
           properties: {
             name: { type: 'string', example: 'Ana Souza' },
             email: { type: 'string', format: 'email', example: 'ana@opsboard.local' },
-            role: { type: 'string', enum: ['Manager', 'Staff', 'Intern'], example: 'Staff' },
+            role: { type: 'string', example: 'Analista de Suporte' },
+            roleLevel: { type: 'string', enum: ['manager', 'staff', 'intern'], example: 'staff' },
             teamId: { type: 'string', example: 'core' },
             isActive: { type: 'boolean', example: true }
           }

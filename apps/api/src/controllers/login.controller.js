@@ -24,9 +24,10 @@ export async function login(req, res) {
     const { login, password } = parsed.data
 
     const {rows} = await getDbPool().query(
-      `SELECT e.id, e.name, e.email, e.role, l.password_hash AS "passwordHash"
+      `SELECT e.id, e.name, e.email, r.level AS role, r.name AS "roleName", l.password_hash AS "passwordHash"
        FROM logins l
        JOIN employees e ON e.login_id = l.id
+       JOIN roles r ON e.role_id = r.id
        WHERE l.login = $1`,
       [login]
     )

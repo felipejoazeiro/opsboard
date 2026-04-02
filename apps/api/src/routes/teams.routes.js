@@ -45,7 +45,7 @@ teamsRouter.get('/', listTeams)
  *       400:
  *         description: Dados invalidos
  */
-teamsRouter.post('/', authorize('Manager'), createTeam)
+teamsRouter.post('/', authorize('manager'), createTeam)
 
 /**
  * @openapi
@@ -76,7 +76,7 @@ teamsRouter.post('/', authorize('Manager'), createTeam)
  *       404:
  *         description: Equipe nao encontrada
  */
-teamsRouter.put('/:id', authorize('Manager'), updateTeam)
+teamsRouter.put('/:id', authorize('manager'), updateTeam)
 
 /**
  * @openapi
@@ -130,7 +130,7 @@ teamsRouter.get('/:teamId/members', listTeamMembers)
  *       404:
  *         description: Equipe ou funcionario nao encontrados
  */
-teamsRouter.post('/:teamId/members', authorize('Manager'), addEmployeeToTeam)
+teamsRouter.post('/:teamId/members', authorize('manager'), addEmployeeToTeam)
 
 /**
  * @openapi
@@ -161,6 +161,6 @@ teamsRouter.post('/:teamId/members', authorize('Manager'), addEmployeeToTeam)
  *       404:
  *         description: Equipe, funcionario ou vinculo nao encontrados
  */
-teamsRouter.delete('/:teamId/members', authorize('Manager'), removeEmployeeFromTeam)
+teamsRouter.delete('/:teamId/members', authorize('manager'), removeEmployeeFromTeam)
 
 export { teamsRouter }

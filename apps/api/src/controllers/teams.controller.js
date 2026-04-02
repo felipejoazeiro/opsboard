@@ -159,10 +159,12 @@ export async function listTeamMembers(req, res, next) {
       `SELECT employees.id,
               employees.name,
               employees.email,
-              employees.role,
+              roles.name AS role,
+              roles.level AS "roleLevel",
               team_members.joined_at AS joined_at
        FROM team_members
        INNER JOIN employees ON employees.id = team_members.employee_id
+       INNER JOIN roles ON roles.id = employees.role_id
        WHERE team_members.team_id = $1
        ORDER BY employees.name ASC`,
       [teamId],

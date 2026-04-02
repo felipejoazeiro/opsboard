@@ -39,7 +39,7 @@ const employeesRouter = Router();
  */
 employeesRouter.get("/", listEmployees);
 
-employeesRouter.get("/:id", authorize(["Manager", "Staff"]), getEmployeeById);
+employeesRouter.get("/:id", authorize(["manager", "staff"]), getEmployeeById);
 
 /**
  * @openapi
@@ -61,7 +61,7 @@ employeesRouter.get("/:id", authorize(["Manager", "Staff"]), getEmployeeById);
  *       400:
  *         description: Dados invalidos
  */
-employeesRouter.post("/", authorize(["Manager", "Staff"]), createEmployee);
+employeesRouter.post("/", authorize(["manager", "staff"]), createEmployee);
 
 /**
  * @openapi
@@ -90,7 +90,7 @@ employeesRouter.post("/", authorize(["Manager", "Staff"]), createEmployee);
  *       404:
  *         description: Funcionario nao encontrado
  */
-employeesRouter.put("/:id", authorize(["Manager", "Staff"]), updateEmployee);
+employeesRouter.put("/:id", authorize(["manager", "staff"]), updateEmployee);
 
 /**
  * @openapi
@@ -115,7 +115,7 @@ employeesRouter.put("/:id", authorize(["Manager", "Staff"]), updateEmployee);
  */
 employeesRouter.delete(
   "/:id",
-  authorize(["Manager", "Staff"]),
+  authorize(["manager", "staff"]),
   inactiveEmployee,
 );
 

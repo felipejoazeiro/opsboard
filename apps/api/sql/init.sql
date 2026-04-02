@@ -7,15 +7,90 @@ CREATE TABLE IF NOT EXISTS logins (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+CREATE TABLE IF NOT EXISTS roles (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name TEXT NOT NULL,
+  level TEXT NOT NULL CHECK (level IN ('manager', 'staff', 'intern')),
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  UNIQUE (name, level)
+);
+
+INSERT INTO roles (name, level)
+VALUES
+  ('Manager', 'manager'),
+  ('Staff', 'staff'),
+  ('Intern', 'intern')
+ON CONFLICT (name, level) DO NOTHING;
+
 CREATE TABLE IF NOT EXISTS employees (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   name TEXT NOT NULL,
   email TEXT NOT NULL UNIQUE,
-  role TEXT NOT NULL CHECK (role IN ('Manager', 'Staff', 'Intern')),
+  role_id UUID REFERENCES roles(id),
   is_active BOOLEAN NOT NULL DEFAULT TRUE,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   login_id UUID REFERENCES logins(id) ON DELETE CASCADE
 );
+
+ALTER TABLE employees ADD COLUMN IF NOT EXISTS role_id UUID;
+
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1
+    FROM information_schema.columns
+    WHERE table_name = 'employees' AND column_name = 'role'
+  ) THEN
+    INSERT INTO roles (name, level)
+    SELECT DISTINCT
+      e.role,
+      CASE
+        WHEN lower(e.role) = 'manager' THEN 'manager'
+        WHEN lower(e.role) = 'intern' THEN 'intern'
+        ELSE 'staff'
+      END
+    FROM employees e
+    WHERE e.role IS NOT NULL
+    ON CONFLICT (name, level) DO NOTHING;
+
+    UPDATE employees e
+    SET role_id = r.id
+    FROM roles r
+    WHERE e.role_id IS NULL
+      AND e.role IS NOT NULL
+      AND r.name = e.role
+      AND r.level = CASE
+        WHEN lower(e.role) = 'manager' THEN 'manager'
+        WHEN lower(e.role) = 'intern' THEN 'intern'
+        ELSE 'staff'
+      END;
+
+    ALTER TABLE employees DROP COLUMN IF EXISTS role;
+  END IF;
+END $$;
+
+INSERT INTO roles (name, level)
+VALUES ('Staff', 'staff')
+ON CONFLICT (name, level) DO NOTHING;
+
+UPDATE employees
+SET role_id = (SELECT id FROM roles WHERE name = 'Staff' AND level = 'staff' LIMIT 1)
+WHERE role_id IS NULL;
+
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1
+    FROM pg_constraint
+    WHERE conname = 'employees_role_id_fk'
+  ) THEN
+    ALTER TABLE employees
+    ADD CONSTRAINT employees_role_id_fk
+    FOREIGN KEY (role_id) REFERENCES roles(id);
+  END IF;
+END $$;
+
+ALTER TABLE employees ALTER COLUMN role_id SET NOT NULL;
 
 -- Seed inicial para teste local.
 -- Login: admin
@@ -24,14 +99,15 @@ INSERT INTO logins (login, password_hash)
 VALUES ('admin', '$2a$12$yBNzrcGXcU6ZBrmLlPU97..EcOTZ2uU9Rl4P/hl8snbpu2afuWJBW')
 ON CONFLICT (login) DO NOTHING;
 
-INSERT INTO employees (name, email, role, is_active, login_id)
+INSERT INTO employees (name, email, role_id, is_active, login_id)
 SELECT
   'Administrador',
   'admin@opsboard.local',
-  'Manager',
+  r.id,
   TRUE,
   l.id
 FROM logins l
+JOIN roles r ON r.level = 'manager'
 WHERE l.login = 'admin'
   AND NOT EXISTS (
     SELECT 1
