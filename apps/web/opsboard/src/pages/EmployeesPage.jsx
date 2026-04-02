@@ -25,6 +25,8 @@ export function EmployeesPage() {
     setSearch,
     isNewEmployeeOpen,
     setIsNewEmployeeOpen,
+    isNewRoleOpen,
+    setIsNewRoleOpen,
     editingEmployee,
     setEditingEmployee,
   } = useEmployee();
@@ -40,6 +42,7 @@ export function EmployeesPage() {
     setDetailsLoading(true);
     setDetailsError(null);
     setSelectedEmployee(null);
+    setIsNewRoleOpen(false);
 
     try {
       const employee = await fetchEmployeeById(employeeId);
@@ -55,19 +58,21 @@ export function EmployeesPage() {
     await updateEmployee(employeeId, payload);
     await load();
     setEditingEmployee(null);
+    setIsNewRoleOpen(false);
   }
 
   async function handleCreateEmployee(payload) {
     await createEmployee(payload);
     await load();
     setIsNewEmployeeOpen(false);
+    setIsNewRoleOpen(false);
   }
 
   return (
     <div className="flex min-h-screen bg-slate-950 text-slate-100">
       <SideBar />
       <main className="flex-1 px-6 py-8 md:px-10">
-        <Header setIsNewEmployeeOpen={setIsNewEmployeeOpen} />
+        <Header setIsNewEmployeeOpen={setIsNewEmployeeOpen} setIsNewRoleOpen={setIsNewRoleOpen} />
         <SearchInput value={search} onChange={setSearch} />
 
         {loading && (

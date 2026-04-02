@@ -8,6 +8,7 @@ export function useEmployee() {
     const [search, setSearch] = useState("");
     const [debouncedSearch, setDebouncedSearch] = useState("");
     const [isNewEmployeeOpen, setIsNewEmployeeOpen] = useState(false);
+    const [isNewRoleOpen, setIsNewRoleOpen] = useState(false);
     const [editingEmployee, setEditingEmployee] = useState(null);
 
     useEffect(() => {
@@ -44,5 +45,7 @@ export function useEmployee() {
         setIsNewEmployeeOpen,
         editingEmployee,
         setEditingEmployee,
+        isNewRoleOpen,
+        setIsNewRoleOpen,
     };
 }
