@@ -2,6 +2,7 @@ import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { LoginPage } from "./pages/LoginPage";
 import { HomePage } from "./pages/HomePage";
 import { DashboardPage } from "./pages/DashboardPage";
+import { EmployeesPage } from "./pages/EmployeesPage";
 import { clearSession, hasValidAccessToken } from "./lib/auth.js";
 import { TeamsPage } from "./pages/TeamsPage.jsx";
 
@@ -53,6 +54,11 @@ function App() {
             </ProtectedRoute>
           }
         />
+        <Route path="/employees" element={
+          <ProtectedRoute>
+            <EmployeesPage />
+          </ProtectedRoute>
+        } />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>

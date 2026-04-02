@@ -14,7 +14,6 @@ const STATUS_OPTIONS = ["To Do", "In Progress", "Done"];
 const PRIORITY_OPTIONS = ["Low", "Medium", "High"];
 
 export function DashboardPage() {
- 
   const {
     tasks,
     loading,
