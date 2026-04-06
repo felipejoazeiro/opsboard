@@ -1,5 +1,5 @@
 import { Router } from 'express'
-import { createTask, listTasks, updateTask, deleteTask } from '../controllers/tasks.controller.js'
+import { createTask, listTasks, getTaskSummary, updateTask, deleteTask } from '../controllers/tasks.controller.js'
 
 const tasksRouter = Router()
 
@@ -16,6 +16,20 @@ const tasksRouter = Router()
  *         description: Lista de tarefas
  */
 tasksRouter.get('/', listTasks)
+
+/**
+ * @openapi
+ * /tasks/summary:
+ *   get:
+ *     tags: [Tasks]
+ *     summary: Retorna o resumo agregado de tarefas
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Resumo de tarefas retornado com sucesso
+ */
+tasksRouter.get('/summary', getTaskSummary)
 
 /**
  * @openapi

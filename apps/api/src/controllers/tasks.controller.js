@@ -17,6 +17,50 @@ const CreateTaskSchema = z.object({
   dueDate: z.string().datetime().optional().or(z.literal('')),
 })
 
+export async function getTaskSummary(req, res, next) {
+  try {
+    const pool = getDbPool()
+
+    const { rows } = await pool.query(
+      `SELECT
+         COUNT(*)::int AS total,
+         COUNT(*) FILTER (WHERE t.status = 'Done')::int AS done,
+         COUNT(*) FILTER (
+           WHERE t.status = 'To Do'
+             AND (t.due_date IS NULL OR t.due_date >= NOW())
+         )::int AS todo,
+         COUNT(*) FILTER (
+           WHERE t.status = 'In Progress'
+             AND (t.due_date IS NULL OR t.due_date >= NOW())
+         )::int AS in_progress,
+         COUNT(*) FILTER (
+           WHERE t.status <> 'Done'
+             AND t.due_date IS NOT NULL
+             AND t.due_date < NOW()
+         )::int AS late
+       FROM tasks t`
+    )
+
+    const summary = rows[0]
+    const distribution = {
+      todo: summary.todo,
+      inProgress: summary.in_progress,
+      late: summary.late,
+    }
+
+    return res.json({
+      data: {
+        total: summary.total,
+        done: summary.done,
+        active: distribution.todo + distribution.inProgress + distribution.late,
+        distribution,
+      },
+    })
+  } catch (error) {
+    next(error)
+  }
+}
+
 export async function listTasks(req, res, next) {
   try {
     const parsed = TaskListQuerySchema.safeParse(req.query)

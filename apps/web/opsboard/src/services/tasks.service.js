@@ -24,6 +24,17 @@ export async function fetchTasks(params = {}) {
   return result
 }
 
+export async function fetchTaskSummary() {
+  const response = await apiFetch('/tasks/summary')
+  const result = await response.json()
+
+  if (!response.ok) {
+    throw new Error(result.message || 'Erro ao buscar resumo de tarefas.')
+  }
+
+  return result
+}
+
 /**
  * Cria uma nova tarefa.
  * @param {{ title: string, description?: string, status?: string, priority?: string, dueDate?: string }} payload
