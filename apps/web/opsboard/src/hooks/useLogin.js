@@ -29,7 +29,7 @@ export function useLogin() {
       localStorage.setItem('user', JSON.stringify(result.user))
 
       setSuccessMessage(`Bem-vindo, ${result.user.name}!`)
-      navigate('/home', { replace: true })
+      navigate('/dashboard', { replace: true })
     } catch (error) {
       if (error.status === 403) {
         setPendingCredentials({ login, password })

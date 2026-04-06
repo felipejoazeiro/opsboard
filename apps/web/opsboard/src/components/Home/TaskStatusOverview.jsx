@@ -50,7 +50,7 @@ export function TaskStatusOverview({ summary, loading, error, onRetry }) {
   const chartSegments = buildChartSegments(distribution, activeTasks, radius);
 
   return (
-    <div className="rounded-[2rem] border border-slate-800 bg-slate-950/80 p-6 shadow-xl shadow-black/40">
+    <div className="rounded-4xl border border-slate-800 bg-slate-950/80 p-6 shadow-xl shadow-black/40">
       <div className="flex items-start justify-between gap-4">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.35em] text-cyan-400/75">
@@ -96,7 +96,7 @@ export function TaskStatusOverview({ summary, loading, error, onRetry }) {
 
       {!loading && !error && (
         <div className="mt-8 grid gap-6 md:grid-cols-[220px_1fr] md:items-center">
-          <div className="mx-auto flex w-full max-w-[220px] flex-col items-center gap-4">
+          <div className="mx-auto flex w-full max-w-55 flex-col items-center gap-4">
             <div className="relative flex h-44 w-44 items-center justify-center">
               <svg
                 viewBox="0 0 140 140"

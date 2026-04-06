@@ -1,118 +1,74 @@
 import { Sidebar } from "../components/Shared/SideBar";
-import { createTask } from "../services/tasks.service";
-import { updateTask } from "../services/tasks.service";
-import { Header } from "../components/Dashboard/Header";
-import { EmptyState } from "../components/Dashboard/EmptyState";
-import { NewTaskCard } from "../components/Dashboard/NewTaskCard";
-import { UpdateTask } from "../components/Dashboard/UpdateTask";
-import { ErrorState } from "../components/Dashboard/ErrorState";
-import { SearchInput } from "../components/Dashboard/SearchInput";
-import { TaskCard } from "../components/Dashboard/TaskCard";
-import { useDashboard } from "../hooks/useDashboard";
-
-const STATUS_OPTIONS = ["To Do", "In Progress", "Done"];
-const PRIORITY_OPTIONS = ["Low", "Medium", "High"];
+import { TaskStatusOverview } from "../components/Home/TaskStatusOverview";
+import { useHomeSummary } from "../hooks/useHomeSummary";
 
 export function DashboardPage() {
-  const {
-    tasks,
-    loading,
-    error,
-    load,
-    search,
-    setSearch,
-    status,
-    setStatus,
-    priority,
-    setPriority,
-    isNewTaskOpen,
-    setIsNewTaskOpen,
-    editingTask,
-    setEditingTask,
-  } = useDashboard();
-
-  async function handleUpdateTask(taskId, payload) {
-    await updateTask(taskId, payload);
-    await load();
-    setEditingTask(null);
-  }
+  const { summary, loading, error, load } = useHomeSummary();
+  const infoCards = [
+    {
+      label: "Total de tarefas",
+      value: summary?.total ?? 0,
+      helper: "Volume geral registrado no sistema.",
+    },
+    {
+      label: "Tarefas ativas",
+      value: summary?.active ?? 0,
+      helper: "Itens entre To Do, In Progress e Late.",
+    },
+    {
+      label: "Concluidas",
+      value: summary?.done ?? 0,
+      helper: "Tarefas finalizadas fora do grafico principal.",
+    },
+  ];
 
   return (
     <div className="flex min-h-screen bg-slate-950 text-slate-100">
       <Sidebar />
 
-      <main className="flex-1 px-6 py-8 md:px-10">
-        <Header setIsNewTaskOpen={setIsNewTaskOpen} />
-        <SearchInput
-          value={search}
-          onChange={setSearch}
-          status={status}
-          setStatus={setStatus}
-          priority={priority}
-          setPriority={setPriority}
-          STATUS_OPTIONS={STATUS_OPTIONS}
-          PRIORITY_OPTIONS={PRIORITY_OPTIONS}
-        />
+      <main className="relative flex-1 overflow-hidden px-6 py-8 md:px-10">
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-56 bg-linear-to-b from-cyan-500/10 to-transparent" />
+        <div className="pointer-events-none absolute right-10 top-10 h-64 w-64 rounded-full bg-cyan-500/10 blur-3xl" />
 
-        {loading && (
-          <div className="flex items-center justify-center py-24">
-            <svg
-              className="h-8 w-8 animate-spin text-cyan-500"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-            >
-              <circle
-                className="opacity-25"
-                cx="12"
-                cy="12"
-                r="10"
-                stroke="currentColor"
-                strokeWidth="4"
-              />
-              <path
-                className="opacity-75"
-                fill="currentColor"
-                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-              />
-            </svg>
+        <section className="relative space-y-8">
+          <div className="max-w-3xl">
+            <p className="text-sm font-medium uppercase tracking-[0.35em] text-cyan-400/80">
+              Dashboard
+            </p>
+            <h1 className="mt-4 text-4xl font-semibold tracking-tight text-white md:text-5xl">
+              Visao consolidada das tarefas
+            </h1>
+            <p className="mt-5 text-base leading-7 text-slate-300">
+              Esta tela concentra os indicadores do fluxo operacional. Para
+              criar, editar e filtrar tarefas, use a tela Tarefas no menu.
+            </p>
           </div>
-        )}
 
-        {!loading && error && <ErrorState message={error} onRetry={load} />}
-
-        {!loading && !error && tasks.length === 0 && <EmptyState />}
-
-        {!loading && !error && tasks.length > 0 && (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {tasks.map((task) => (
-              <TaskCard
-                key={task.id}
-                task={task}
-                onEdit={(taskToEdit) => setEditingTask(taskToEdit)}
-              />
+          <div className="grid gap-4 lg:grid-cols-3">
+            {infoCards.map((card) => (
+              <article
+                key={card.label}
+                className="rounded-3xl border border-slate-800 bg-slate-900/70 p-5 shadow-lg shadow-black/20"
+              >
+                <p className="text-sm text-slate-400">{card.label}</p>
+                <p className="mt-3 text-4xl font-semibold text-white">
+                  {card.value}
+                </p>
+                <p className="mt-2 text-sm leading-6 text-slate-500">
+                  {card.helper}
+                </p>
+              </article>
             ))}
           </div>
-        )}
+
+          <TaskStatusOverview
+            summary={summary}
+            loading={loading}
+            error={error}
+            onRetry={load}
+          />
+        </section>
       </main>
-
-      {isNewTaskOpen && (
-        <NewTaskCard
-          onClose={() => setIsNewTaskOpen(false)}
-          onCreated={load}
-          createTask={createTask}
-          STATUS_OPTIONS={STATUS_OPTIONS}
-          PRIORITY_OPTIONS={PRIORITY_OPTIONS}
-        />
-      )}
-
-      {editingTask && (
-        <UpdateTask
-          task={editingTask}
-          onUpdate={handleUpdateTask}
-          onClose={() => setEditingTask(null)}
-        />
-      )}
     </div>
   );
 }

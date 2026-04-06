@@ -1,7 +1,7 @@
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { LoginPage } from "./pages/LoginPage";
-import { HomePage } from "./pages/HomePage";
 import { DashboardPage } from "./pages/DashboardPage";
+import { TaskPage } from "./pages/TaskPage";
 import { EmployeesPage } from "./pages/EmployeesPage";
 import { clearSession, hasValidAccessToken } from "./lib/auth.js";
 import { TeamsPage } from "./pages/TeamsPage.jsx";
@@ -17,7 +17,7 @@ function ProtectedRoute({ children }) {
 
 function PublicLoginRoute() {
   if (hasValidAccessToken()) {
-    return <Navigate to="/home" replace />;
+    return <Navigate to="/dashboard" replace />;
   }
 
   clearSession();
@@ -30,19 +30,20 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<PublicLoginRoute />} />
-        <Route
-          path="/home"
-          element={
-            <ProtectedRoute>
-              <HomePage />
-            </ProtectedRoute>
-          }
-        />
+        <Route path="/home" element={<Navigate to="/dashboard" replace />} />
         <Route
           path="/dashboard"
           element={
             <ProtectedRoute>
               <DashboardPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/task"
+          element={
+            <ProtectedRoute>
+              <TaskPage />
             </ProtectedRoute>
           }
         />

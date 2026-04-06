@@ -1,7 +1,7 @@
-import { useState } from 'react'
-import { NavLink, useNavigate } from 'react-router-dom'
-import { clearSession } from '../../lib/auth.js'
-import { logoutRequest } from '../../services/auth.service.js'
+import { useState } from "react";
+import { NavLink, useNavigate } from "react-router-dom";
+import { clearSession } from "../../lib/auth.js";
+import { logoutRequest } from "../../services/auth.service.js";
 import {
   LayoutDashboard,
   Users,
@@ -10,41 +10,41 @@ import {
   Menu,
   X,
   LogOut,
-} from 'lucide-react'
+} from "lucide-react";
 
 const items = [
   {
-    to: '/dashboard',
-    label: 'Dashboard',
+    to: "/dashboard",
+    label: "Dashboard",
+    icon: MonitorCog,
+  },
+  {
+    to: "/task",
+    label: "Tarefas",
     icon: LayoutDashboard,
   },
   {
-    to: '/employees',
-    label: 'Funcionários',
+    to: "/employees",
+    label: "Funcionários",
     icon: Users,
   },
   {
-    to: '/teams',
-    label: 'Equipes',
+    to: "/teams",
+    label: "Equipes",
     icon: Layers3,
   },
-  {
-    to: '/equipments',
-    label: 'Equipamentos',
-    icon: MonitorCog,
-  },
-]
+];
 
 function Sidebar({ children }) {
-  const [open, setOpen] = useState(false)
-  const navigate = useNavigate()
+  const [open, setOpen] = useState(false);
+  const navigate = useNavigate();
 
   async function logout() {
     try {
-      await logoutRequest()
+      await logoutRequest();
     } finally {
-      clearSession()
-      navigate('/', { replace: true })
+      clearSession();
+      navigate("/", { replace: true });
     }
   }
 
@@ -68,9 +68,7 @@ function Sidebar({ children }) {
         <aside className="sticky top-0 flex h-screen w-72 flex-col border-r border-slate-800 bg-slate-950 px-4 py-5">
           <div className="mb-8">
             <h1 className="text-2xl font-bold text-cyan-400">OpsBoard</h1>
-            <p className="mt-1 text-sm text-slate-400">
-              Gerencie sua operação
-            </p>
+            <p className="mt-1 text-sm text-slate-400">Gerencie sua operação</p>
           </div>
 
           <div className="mb-3 px-2 text-xs font-semibold uppercase tracking-wider text-slate-500">
@@ -79,7 +77,7 @@ function Sidebar({ children }) {
 
           <nav className="flex-1 space-y-2">
             {items.map((item) => {
-              const Icon = item.icon
+              const Icon = item.icon;
 
               return (
                 <NavLink
@@ -87,21 +85,24 @@ function Sidebar({ children }) {
                   to={item.to}
                   className={({ isActive }) =>
                     [
-                      'flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all duration-200',
+                      "flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all duration-200",
                       isActive
-                        ? 'bg-cyan-500 text-slate-950 shadow-md'
-                        : 'text-slate-300 hover:bg-slate-800 hover:text-white',
-                    ].join(' ')
+                        ? "bg-cyan-500 text-slate-950 shadow-md"
+                        : "text-slate-300 hover:bg-slate-800 hover:text-white",
+                    ].join(" ")
                   }
                 >
                   <Icon size={18} />
                   <span>{item.label}</span>
                 </NavLink>
-              )
+              );
             })}
           </nav>
 
-          <button onClick={logout} className="mt-4 flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-slate-300 transition hover:bg-red-500/10 hover:text-red-400">
+          <button
+            onClick={logout}
+            className="mt-4 flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-slate-300 transition hover:bg-red-500/10 hover:text-red-400"
+          >
             <LogOut size={18} />
             Sair
           </button>
@@ -140,7 +141,7 @@ function Sidebar({ children }) {
 
             <nav className="flex-1 space-y-2">
               {items.map((item) => {
-                const Icon = item.icon
+                const Icon = item.icon;
 
                 return (
                   <NavLink
@@ -149,21 +150,24 @@ function Sidebar({ children }) {
                     onClick={() => setOpen(false)}
                     className={({ isActive }) =>
                       [
-                        'flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all duration-200',
+                        "flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all duration-200",
                         isActive
-                          ? 'bg-cyan-500 text-slate-950 shadow-md'
-                          : 'text-slate-300 hover:bg-slate-800 hover:text-white',
-                      ].join(' ')
+                          ? "bg-cyan-500 text-slate-950 shadow-md"
+                          : "text-slate-300 hover:bg-slate-800 hover:text-white",
+                      ].join(" ")
                     }
                   >
                     <Icon size={18} />
                     <span>{item.label}</span>
                   </NavLink>
-                )
+                );
               })}
             </nav>
 
-            <button onClick={logout} className="mt-4 flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-slate-300 transition hover:bg-red-500/10 hover:text-red-400">
+            <button
+              onClick={logout}
+              className="mt-4 flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-slate-300 transition hover:bg-red-500/10 hover:text-red-400"
+            >
               <LogOut size={18} />
               Sair
             </button>
@@ -171,7 +175,7 @@ function Sidebar({ children }) {
         </div>
       )}
     </div>
-  )
+  );
 }
 
-export { Sidebar, Sidebar as SideBar }
+export { Sidebar, Sidebar as SideBar };
